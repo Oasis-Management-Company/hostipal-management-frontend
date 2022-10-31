@@ -1,0 +1,325 @@
+<div id="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-4 ms-0">
+                <div class="page-title">
+                    <div class="row pb-2">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>Drugs Catalog</h3>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Drugs</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="notAuthorised">
+                    <strong class="col-11 text-danger mt-2">Access Denied. Your access is restricted, contact admin for
+                        clearance</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row pb-2 justify-content-start m-0 mt-3">
+                    <div class="col-md-6 col-lg-3 col-12 form-group p-0 m-0">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <select id="sort" class="form-control">
+                                    <option value="0">By ID</option>
+                                    <option value="1">By Name</option>
+                                    <option value="2">By Uses</option>
+                                </select>
+                            </div>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-9 d-flex justify-content-end pe-0">
+                        <button class="btn btn-blue" (click)="add()">Add Drug</button>
+                    </div>
+                </div>
+                <div class="modal bg-opaque fade show" id="modal" *ngIf="createModal">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-blue">
+                                <h5 class="modal-title text-light">Create Drug</h5>
+                                <button class="btn" (click)="closeModal()"><span
+                                        class="text-light">&times;</span></button>
+                            </div>
+
+                            <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="registered">
+                                <strong class="col-11 text-success mt-2">Drug Creation Successful</strong>
+                                <button type="button" class="close col-1 text-success text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="registerFailed">
+                                <strong class="col-11 text-danger mt-2">Creation Failed</strong>
+                                <button type="button" class="close col-1 text-danger text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <form [formGroup]="createForm" (ngSubmit)="create()" class="form">
+                                <div class="modal-body">
+                                    <div class="form-body">
+                                        <div class="form-group">
+                                            <label for="name">Name</label>
+                                            <input type="text" class="form-control" name="name" formControlName="name">
+                                            <div class="alert alert-danger p-2"
+                                                *ngIf="(name?.touched) && (name?.invalid)">
+                                                <span *ngIf="name?.errors?.['required']">This field
+                                                    is required.</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="description">Description</label>
+                                            <textarea rows="3" class="form-control" name="description"
+                                                formControlName="description"></textarea>
+                                            <div class="alert alert-danger p-2"
+                                                *ngIf="(Description?.touched) && (Description?.invalid)">
+                                                <span *ngIf="Description?.errors?.['required']">This field
+                                                    is required.</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="uses">Uses</label>
+                                            <textarea rows="3" class="form-control" name="uses"
+                                                formControlName="uses"></textarea>
+                                            <div class="alert alert-danger p-2"
+                                                *ngIf="(Uses?.touched) && (Uses?.invalid)">
+                                                <span *ngIf="Uses?.errors?.['required']">This field
+                                                    is required.</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantity">Quantity</label>
+                                            <input type="text" class="form-control" name="quantity"
+                                                formControlName="quantity">
+                                            <div class="alert alert-danger p-2"
+                                                *ngIf="(Quantity?.touched) && (Quantity?.invalid)">
+                                                <span *ngIf="Quantity?.errors?.['required']">This field
+                                                    is required.</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="cost">Cost(<span class="iconify"
+                                                    data-icon="tabler:currency-naira"
+                                                    style="height: 20px;width: 15px;"></span>)</label>
+                                            <input type="text" class="form-control" name="cost" formControlName="cost">
+                                            <div class="alert alert-danger p-2"
+                                                *ngIf="(Cost?.touched) && (Cost?.invalid)">
+                                                <span *ngIf="Cost?.errors?.['required']">This field
+                                                    is required.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer p-3">
+                                    <button type="button" (click)="closeModal()"
+                                        class="btn btn-light-primary">Close</button>
+                                    <button class="btn btn-blue" [disabled]="createForm?.invalid"
+                                        type="submit">Create</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="drugs.length > 0; else notFound">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Drug ID</th>
+                                    <th>Drug Name</th>
+                                    <th>Quantity</th>
+                                    <th>Description</th>
+                                    <th>Cost(<span class="iconify" data-icon="tabler:currency-naira"
+                                            style="height: 20px;width: 15px;"></span>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let drug of drugs">
+                                    <td>{{drug.id}}</td>
+                                    <td>{{drug.drugName}}</td>
+                                    <td>{{drug.quantity}}</td>
+                                    <td>{{drug.description}}</td>
+                                    <td>{{drug.cost}}</td>
+                                    <td>
+                                        <button (click)="editDrug(drug.id)" class="btn btn-blue">Edit</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Edit Drug Details
+                                    </h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="updated">
+                                    <strong class="col-11 text-success mt-2">Drug Details Updated</strong>
+                                    <button type="button" class="close col-1 text-success text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="updateFailed">
+                                    <strong class="col-11 text-danger mt-2">Drug Details could not be
+                                        updated</strong>
+                                    <button type="button" class="close col-1 text-danger text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="d-flex justify-content-center m-3">
+                                    <button (click)="dispenseLog(drug.drugName)" class="btn btn-blue col-12">View
+                                        Dispense Logs</button>
+                                </div>
+                                <form [formGroup]="updateForm" (ngSubmit)="update(drug.id)" class="form">
+                                    <div class="modal-body">
+                                        <div class="form-body">
+                                            <div class="form-group">
+                                                <label for="name">Name</label>
+                                                <input type="text" class="form-control" name="name"
+                                                    [value]="drug.drugName" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="description">Description</label>
+                                                <textarea rows="3" class="form-control" name="description"
+                                                    formControlName="description"
+                                                    [(ngModel)]="drug.description"></textarea>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(description?.touched) && (description?.invalid)">
+                                                    <span *ngIf="description?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="uses">Uses</label>
+                                                <textarea rows="3" class="form-control" name="uses"
+                                                    formControlName="uses" [(ngModel)]="drug.uses"></textarea>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(uses?.touched) && (uses?.invalid)">
+                                                    <span *ngIf="uses?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="quantity">Quantity</label>
+                                                <input type="text" class="form-control" name="quantity"
+                                                    formControlName="quantity" [(ngModel)]="drug.quantity">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(quantity?.touched) && (quantity?.invalid)">
+                                                    <span *ngIf="quantity?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="cost">Cost(<span class="iconify"
+                                                        data-icon="tabler:currency-naira"
+                                                        style="height: 20px;width: 15px;"></span>)</label>
+                                                <input type="text" class="form-control" name="cost"
+                                                    formControlName="cost" [(ngModel)]="drug.cost">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(cost?.touched) && (cost?.invalid)">
+                                                    <span *ngIf="cost?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer p-3">
+                                        <button type="button" (click)="closeModal()"
+                                            class="btn btn-light-primary">Close</button>
+                                        <button class="btn btn-blue" type="submit">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="logModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">{{drug.drugName}}'s Dispense Logs
+                                    </h5>
+                                    <button class="btn" (click)="closeLogs()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ng-container *ngIf="logs.length > 0; else noLogs">
+                                        <div class="row pb-2 justify-content-start m-0 mt-3">
+                                            <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                <label>Search</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <select id="sort2" class="form-control">
+                                                            <option value="0">By Date
+                                                            </option>
+                                                            <option value="2">By Description
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <input type="text" class="col-md-6 form-control" id="search2"
+                                                        onkeyup="search('table2')" placeholder="Search">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive list">
+                                            <table class="table table-hover" id="table1">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Activity</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <ng-container *ngFor="let log of logs">
+                                                        <tr>
+                                                            <td>{{log.date}}</td>
+                                                            <td>{{log.person}} {{log.activity}}</td>
+                                                            <td>{{log.description}}</td>
+                                                        </tr>
+                                                    </ng-container>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #noLogs>
+                                        <div class="p-3 text-center bg-light mb-3">No Logs Found</div>
+                                    </ng-template>
+                                    <div class="modal-footer p-0 pt-2">
+                                        <button type="button" (click)="closeLogs()"
+                                            class="btn btn-light-primary">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Drugs Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

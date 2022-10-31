@@ -1,0 +1,163 @@
+<div class="app auth">
+    <div class="page-content">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-4 col-md-8 col-10 card mt-5 p-4 pe-5 ps-5" *ngIf="signupPage">
+                <h2 class="font-bold">System Setup</h2>
+                <div class="font-semibold text-muted mb-4">Already setup system? Login <a (click)="login()"
+                        class="blue">here</a>.</div>
+                <form class="form" [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+                    <div class="form-body row">
+                        <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                            id="alert" *ngIf="submitFailed">
+                            <strong class="col-11 text-danger mt-2">Failed to setup system, Please try again.</strong>
+                            <button type="button" class="close col-1 text-danger btn"
+                                (click)="dismissAlert()">&times;</button>
+                        </div>
+                        <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                            id="alert" *ngIf="emailExists">
+                            <strong class="col-11 text-danger">Failed to setup system, Hospital Already Exists.</strong>
+                            <button type="button" class="close col-1 text-danger btn"
+                                (click)="dismissAlert()">&times;</button>
+                        </div>
+                        <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                            id="alert" *ngIf="isSubmitted">
+                            <strong class="col-11 text-success">System Setup Complete. Check email for
+                                confirmation</strong>
+                            <button type="button" class="close col-1 text-success btn"
+                                (click)="dismissAlert()">&times;</button>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Hospital Name" formControlName="name"
+                                required>
+                            <div class="alert alert-danger p-2" *ngIf="(name?.touched) && (name?.invalid)">
+                                <span *ngIf="name?.errors?.['required']">This field is required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <input type="text" class="form-control" placeholder="Email" formControlName="email">
+                            <div class="alert alert-danger p-2" *ngIf="(email?.touched) && (email?.invalid)">
+                                <span *ngIf="email?.errors?.['required']">This field is required.</span>
+                                <span *ngIf="email?.errors?.['email']">Incorrect email format.</span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <input type="text" class="form-control" placeholder="Phone Number" formControlName="phone">
+                            <div class="alert alert-danger p-2" *ngIf="(phone?.touched) && (phone?.invalid)">
+                                <span *ngIf="phone?.errors?.['required']">This field is required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <input type="password" class="form-control" placeholder="Access Code"
+                                formControlName="code">
+                            <div class="alert alert-danger p-2" *ngIf="(code?.touched) && (code?.invalid)">
+                                <span *ngIf="code?.errors?.['required']">This field is required.</span>
+                                <span *ngIf="code?.errors?.['minlength']">
+                                    Password is too short.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <input type="password" class="form-control" placeholder="Confirm Code"
+                                formControlName="confirm">
+                            <div class="alert alert-danger p-2"
+                                *ngIf="(confirm?.touched) && ((confirm?.invalid) || notEqual)">
+                                <span *ngIf="confirm?.errors?.['required']">This field is required.</span>
+                                <span *ngIf="notEqual">
+                                    Password must match.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="3" class="form-control" placeholder="Address"
+                                formControlName="address"></textarea>
+                            <div class="alert alert-danger p-2" *ngIf="(address?.touched) && (address?.invalid)">
+                                <span *ngIf="address?.errors?.['required']">This field is required.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="font-semibold text-muted mb-4">Are you a staff member? Login <a
+                            [routerLink]="['/hospital/staff/login']" class="blue">here</a>.</div>
+                    <div class="form-actions d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-blue me-1">Register</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-4 col-md-8 col-10 card mt-5 p-4 pe-5 ps-5" *ngIf="loginPage">
+                <h2 class="font-bold">System Login</h2>
+                <div class="font-semibold text-muted mb-4">Do not have an account? Register <a (click)="register()"
+                        class="blue">here</a>.
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="loginError">
+                    <strong class="col-10 text-danger mt-2">Login Error. Invalid credentials</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <form class="form" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <input type="text" name="email" class="form-control" placeholder="Hospital Email"
+                                formControlName="email">
+                            <div class="alert alert-danger p-2" *ngIf="(Email?.touched) && (Email?.invalid)">
+                                <span *ngIf="Email?.errors?.['email']">Incorrect email
+                                    format.</span>
+                                <span *ngIf="Email?.errors?.['required']">This field is required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control" placeholder="Password"
+                                formControlName="password">
+                            <div class="alert alert-danger p-2" *ngIf="(Password?.touched) && (Password?.invalid)">
+                                <span *ngIf="Password?.errors?.['required']">This field is required.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="font-semibold text-muted mb-4">Forgot your password? Click <a class="blue"
+                            (click)="forgotPassword()">here</a>.
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5">
+                        <button type="submit" class="btn btn-blue me-1">Login</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-4 col-md-8 col-10 card mt-5 p-4 pe-5 ps-5" *ngIf="forgotPass">
+                <h2 class="font-bold">Forgot Password</h2>
+                <div class="font-semibold text-muted mb-4">Remember your password? Click <a class="blue"
+                        (click)="remember()">here</a>.
+                </div>
+                <form class="form mt-1" [formGroup]="forgotForm" (ngSubmit)="forgot()">
+                    <div class="row alert alert-light-success alert-dismissible mt-3 m-3 p-2 show" role="alert"
+                        id="alert" *ngIf="success">
+                        <strong class="col-11  text-success">Email Sent. Check email for next step</strong>
+                        <button type="button" class="close col-1 text-center text-success btn p-0"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="row alert alert-light-danger alert-dismissible mt-3 m-3 p-2 show" role="alert"
+                        id="alert" *ngIf="error">
+                        <strong class="col-11 mt-2 text-danger">Account does not exist</strong>
+                        <button type="button" class="close col-1 text-center text-danger btn"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="form-body">
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control" placeholder="Email"
+                                formControlName="email">
+                            <div class="alert alert-danger p-2" *ngIf="(Femail?.touched) && (Femail?.invalid)">
+                                <span *ngIf="Femail?.errors?.['required']">This field is
+                                    required.</span>
+                                <span *ngIf="Femail?.errors?.['email']">Incorrect email syntax.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5">
+                        <button type="submit" class="btn btn-blue me-1">Submit</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

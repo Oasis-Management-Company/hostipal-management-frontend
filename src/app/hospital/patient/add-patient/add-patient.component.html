@@ -1,0 +1,414 @@
+<div id="app">
+    <app-hospital-sidebar></app-hospital-sidebar>
+    <div id="main" class="row p-2">
+        <header class="col-4">
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="col-8 page-heading m-0 d-flex justify-content-end">
+            <h6>{{date}}</h6>
+        </div>
+        <div class="page-heading mb-0">
+            <section class="section">
+                <div class="row">
+                    <div class="col-12 col-md-5 col-lg-4 pe-0">
+                        <div class="col-12">
+                            <div class="card mb-3">
+                                <div class="card-body pb-0">
+                                    <div class="row">
+                                        <div class="col-md-4 col-4">
+                                            <div class="stats-icon" style="background-color: #5785fe;">
+                                                <i class="iconify" data-icon="bi:person-fill" style="color: white;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-8">
+                                            <h6 class="text-muted font-semibold">Walk-Ins</h6>
+                                            <p class="text-muted font-semibold">{{visits.length}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card mb-3">
+                                <div class="card-body pb-0">
+                                    <div class="row">
+                                        <div class="col-md-4 col-4">
+                                            <div class="stats-icon" style="background-color: #050a30;">
+                                                <i class="iconify"
+                                                    data-icon="healthicons:i-schedule-school-date-time-outline"
+                                                    style="color: white;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-8">
+                                            <h6 class="text-muted font-semibold">Appointments</h6>
+                                            <p class="text-muted font-semibold">{{appointments.length}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-7 col-lg-8 pe-0">
+                        <div class="card mb-3">
+                            <div class="card-body pb-0">
+                                <div class="row">
+                                    <h5 class="text-muted font-semibold">Search Patients</h5>
+                                    <form [formGroup]="searchForm" (ngSubmit)="search()">
+                                        <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                            role="alert" id="alert" *ngIf="notFound">
+                                            <strong class="col-11 text-danger mt-2">Could not find patient. Incorrect
+                                                details</strong>
+                                            <button type="button" class="close col-1 text-danger text-center btn"
+                                                (click)="dismissAlert()">&times;</button>
+                                        </div>
+                                        <div class="form-body row">
+                                            <div class="form-group col-12 col-md-6">
+                                                <input type="text" class="form-control" name="fname"
+                                                    formControlName="sFname" placeholder="First Name">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(sFname?.touched) && (sFname?.invalid)">
+                                                    <span *ngIf="sFname?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-12 col-md-6">
+                                                <input type="text" class="form-control" name="lname"
+                                                    formControlName="sLname" placeholder="Last Name">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(sLname?.touched) && (sLname?.invalid)">
+                                                    <span *ngIf="sLname?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dob">Date Of Birth</label>
+                                                <input type="date" name="dob" class="form-control"
+                                                    formControlName="sDob">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(sDob?.touched) && (sDob?.invalid)">
+                                                    <span *ngIf="sDob?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions d-flex justify-content-end m-2">
+                                            <button class="btn btn-blue me-1" type="submit"
+                                                [disabled]="searchForm.invalid">Search</button>
+                                            <button type="reset" class="btn btn-light-primary">Cancel</button>
+                                        </div>
+                                    </form>
+                                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-blue">
+                                                    <h5 class="modal-title text-light">Patient Details</h5>
+                                                    <button class="btn" (click)="closeModal()"><span
+                                                            class="text-light">&times;</span></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-body">
+                                                        <div class="form-group">
+                                                            <label for="id">Patient ID</label>
+                                                            <input type="text" class="form-control" name="id"
+                                                                [value]="details.id" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="fname">First Name</label>
+                                                            <input type="text" class="form-control" name="fname"
+                                                                [value]="details.fname" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="lname">Last Name</label>
+                                                            <input type="text" class="form-control" name="lname"
+                                                                [value]="details.lname" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="email">Email</label>
+                                                            <input type="email" class="form-control" name="email"
+                                                                [value]="details.email" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="phone">Phone Number</label>
+                                                            <input type="text" class="form-control" name="phone"
+                                                                [value]="details.phone" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="address">Address</label>
+                                                            <textarea type="text" class="form-control" name="address"
+                                                                [value]="details.address" disabled>
+                                                            </textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" id="close" (click)="closeModal()"
+                                                        class="btn btn-light-primary">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-12 pe-0">
+                        <div class="card mb-3 p-2">
+                            <div class="card-content">
+                                <div class="page-title">
+                                    <div class="row p-4">
+                                        <div class="col-12 col-md-9 order-md-1 order-last">
+                                            <h3>Create Patient</h3>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-12 col-md-3 order-md-2 order-first">
+                                            <nav aria-label="breadcrumb"
+                                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                                <ol class="breadcrumb pt-1 p-0">
+                                                    <li class="breadcrumb-item">
+                                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                                style="color: #050a30;"></i></a>
+                                                    </li>
+                                                    <li class="breadcrumb-item active" aria-current="page">
+                                                        Add Patient</li>
+                                                </ol>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                        role="alert" id="alert" *ngIf="submitted">
+                                        <strong class="col-11 text-success mt-2">Registration Successful</strong>
+                                        <button type="button" class="close col-1 text-success text-center btn"
+                                            (click)="dismissAlert()">&times;</button>
+                                    </div>
+                                    <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                        role="alert" id="alert" *ngIf="submitFailed">
+                                        <strong class="col-11 text-danger mt-2">Registration Failed, Please Try
+                                            Again.</strong>
+                                        <button type="button" class="close col-1 text-danger text-center btn"
+                                            (click)="dismissAlert()">&times;</button>
+                                    </div>
+                                    <form [formGroup]="createForm" (ngSubmit)="create()">
+                                        <div class="form-body">
+                                            <div class="row">
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <input type="text" name="firstName" class="form-control"
+                                                        placeholder="First Name" formControlName="fname">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(fname?.touched) && (fname?.invalid)">
+                                                        <span *ngIf="fname?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <input type="text" name="lastName" class="form-control"
+                                                        placeholder="Last Name" formControlName="lname">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(lname?.touched) && (lname?.invalid)">
+                                                        <span *ngIf="lname?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="email" name="email" class="form-control"
+                                                    placeholder="Email" formControlName="email">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(email?.touched) && (email?.invalid)">
+                                                    <span *ngIf="email?.errors?.['required']">This field is
+                                                        required.</span>
+                                                    <span *ngIf="email?.errors?.['email']">Incorrect email
+                                                        format.</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="btn-group col-12 col-md-6 col-lg-6 mb-3">
+                                                    <input type="radio" id="male" name="gender"
+                                                        class="btn-check form-control" formControlName="gender"
+                                                        autocomplete="off" value="Male">
+                                                    <label for="male" class="btn btn-outline-dark">Male</label>
+                                                    <input type="radio" id="female" name="gender"
+                                                        class="btn-check form-control" formControlName="gender"
+                                                        autocomplete="off" value="Female">
+                                                    <label for="female" class="btn btn-outline-dark">Female</label>
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(gender?.touched) && (gender?.invalid)">
+                                                        <span *ngIf="gender?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <input type="text" name="phone" class="form-control"
+                                                        formControlName="phone" placeholder="Phone Number">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(phone?.touched) && (phone?.invalid)">
+                                                        <span *ngIf="phone?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <textarea name="address" class="form-control" formControlName="address"
+                                                    placeholder="Address">
+                                                </textarea>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(address?.touched) && (address?.invalid)">
+                                                    <span *ngIf="address?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <label for="id-type">ID Type</label>
+                                                    <select name="id-type" class="form-control"
+                                                        formControlName="id_type">
+                                                        <option value="Driver's Licence" selected>Driver's Licence
+                                                        </option>
+                                                        <option value="National ID Card">National ID Card</option>
+                                                        <option value="International Passport">International Passport
+                                                        </option>
+                                                        <option value="Voter's Card">Voter's Card</option>
+                                                    </select>
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(id_type?.touched) && (id_type?.invalid)">
+                                                        <span *ngIf="id_type?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <label for="ID">ID Number</label>
+                                                    <input type="text" name="ID" class="form-control"
+                                                        placeholder="Identification Number" formControlName="id_no">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(id_no?.touched) && (id_no?.invalid)">
+                                                        <span *ngIf="id_no?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dob">Date</label>
+                                                <input type="date" name="dob" class="form-control"
+                                                    formControlName="dob">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(dob?.touched) && (dob?.invalid)">
+                                                    <span *ngIf="dob?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions d-flex justify-content-end mt-5">
+                                            <button type="submit" class="btn btn-blue me-1"
+                                                [disabled]="createForm.invalid">Register</button>
+                                            <button type="reset" class="btn btn-light-primary">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-12 pe-0">
+                        <div class="card p-2">
+                            <div class="card-content">
+                                <div class="page-title">
+                                    <div class="row p-4">
+                                        <div class="col-12 col-md-9 order-md-1 order-last">
+                                            <h3>New Visit</h3>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-12 col-md-3 order-md-2 order-first">
+                                            <nav aria-label="breadcrumb"
+                                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                                <ol class="breadcrumb pt-1 p-0">
+                                                    <li class="breadcrumb-item">
+                                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                                style="color: #050a30;"></i></a>
+                                                    </li>
+                                                    <li class="breadcrumb-item active" aria-current="page">
+                                                        Visit</li>
+                                                </ol>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                        role="alert" id="alert" *ngIf="Vsubmitted">
+                                        <strong class="col-11 mt-2 text-success">Visit Created Successfully</strong>
+                                        <button type="button" class="close col-1 text-success text-center btn"
+                                            (click)="dismissAlert()">&times;</button>
+                                    </div>
+                                    <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                        role="alert" id="alert" *ngIf="VsubmitFailed">
+                                        <strong class="col-11 mt-2 text-danger">Visit Creation Failed, Please Try
+                                            Again.</strong>
+                                        <button type="button" class="close col-1 text-danger text-center btn"
+                                            (click)="dismissAlert()">&times;</button>
+                                    </div>
+                                    <form [formGroup]="visitForm" (ngSubmit)="newVisit()">
+                                        <div class="form-body">
+                                            <div class="row">
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <label for="id">Patient ID</label>
+                                                    <input type="text" name="id" class="form-control"
+                                                        placeholder="Patient ID" formControlName="id">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(id?.touched) && (id?.invalid)">
+                                                        <span *ngIf="id?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-12 col-md-6 col-lg-6">
+                                                    <label for="time">Time</label>
+                                                    <input type="time" name="time" class="form-control"
+                                                        formControlName="time">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(time?.touched) && (time?.invalid)">
+                                                        <span *ngIf="time?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="specialist">Specialist</label>
+                                                <select formControlName="specialist" name="specialist"
+                                                    class="form-control">
+                                                    <option value="Consultant" selected>Consultant</option>
+                                                    <option value="ENT">ENT</option>
+                                                    <option value="Cardiologist">Cardiologist</option>
+                                                    <option value="Physician">Physician</option>
+                                                    <option value="Ophthalmologist">Ophthalmologist</option>
+                                                    <option value="Dermatologist">Dermatologist</option>
+                                                    <option value="OB-GYN">OB-GYN</option>
+                                                    <option value="Urologist">Urologist</option>
+                                                    <option value="Pediatrician">Pediatrician</option>
+                                                    <option value="Psychiatrist">Psychiatrist</option>
+                                                    <option value="Neurologist">Neurologist</option>
+                                                </select>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(specialist?.touched) && (specialist?.invalid)">
+                                                    <span *ngIf="specialist?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions d-flex justify-content-end mt-5">
+                                            <button type="submit" class="btn btn-blue me-1"
+                                                [disabled]="visitForm.invalid">Done</button>
+                                            <button type="reset" class="btn btn-light-primary">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

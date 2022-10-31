@@ -1,0 +1,171 @@
+<div class="app">
+    <app-sidebar></app-sidebar>
+    <div id="main" class="row p-3">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-3">
+                <div class="row pt-2 pe-0">
+                    <div class="col-12 col-md-9 order-md-1 order-last">
+                        <h3>Patient Records</h3>
+                    </div>
+                    <div class="col-12 col-md-3 order-md-2 order-first pe-0">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-md-end float-lg-end">
+                            <ol class="breadcrumb p-0 pt-1">
+                                <li class="breadcrumb-item">
+                                    <a><i class="iconify" data-icon="bi:person-fill" style="color: #050a30;"></i></a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    Visit Records</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="row pb-2 justify-content-start m-0 mt-3 mb-3">
+                    <div class="col-md-6 col-lg-3 col-12 form-group p-0 mb-0">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <select id="sort" class="form-control">
+                                    <option value="0">By Date</option>
+                                    <option value="1">By Doctor</option>
+                                    <option value="5">By Paid</option>
+                                </select>
+                            </div>
+                            <input type="text" class="col-md-6 col-lg-9 form-control" id="search"
+                                onkeyup="search('table1')" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-9 d-flex justify-content-end pe-0">
+                        <button class="btn btn-blue" (click)="getLab()">Lab Results</button>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="labModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Lab Results
+                                    </h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ng-container *ngIf="labs.length > 0; else noLab">
+                                        <div class="row" *ngFor="let lab of labs">
+                                            <div class="col-md-4">
+                                                <label>{{lab.date}}</label>
+                                            </div>
+                                            <div class="col-md-8" *ngIf="lab.testResult != null;else noTest"><a
+                                                    class="blue" (click)="download(lab.testResult,lab.uploadName)"><span
+                                                        class="iconify"
+                                                        data-icon="eva:download-fill"></span>{{lab.uploadName}}</a>
+                                            </div>
+                                            <!-- <pdf-viewer [src]="lab.testResult" [render-text]="true"
+                                                style="display: block;"></pdf-viewer> -->
+                                            <ng-template #noTest>
+                                                <div class="text-center">-</div>
+                                            </ng-template>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #noLab>
+                                        <div class="p-3 text-center bg-light mb-3">No Lab Result</div>
+                                    </ng-template>
+                                </div>
+                                <div class="modal-footer p-2">
+                                    <button type="button" (click)="closeModal()"
+                                        class="btn btn-light-primary">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="records.length > 0; else notFound">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor</th>
+                                    <th>Diagnosis</th>
+                                    <th>Cost(<span class="iconify" data-icon="tabler:currency-naira"
+                                            style="height: 20px;width: 15px;"></span>)</th>
+                                    <th>Review</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let record of records">
+                                    <tr>
+                                        <td>{{record.date}}</td>
+                                        <td>{{record.doctorName}}</td>
+                                        <td>{{record.diagnosis}}</td>
+                                        <td>{{record.costOfTreatment}}</td>
+                                        <td *ngIf="record.paid === 0" class="text-center"><span
+                                                class="badge text-danger">Not
+                                                Paid</span>
+                                        </td>
+                                        <td *ngIf="record.paid === 1" class="text-center"><span
+                                                class="badge text-success">Paid</span></td>
+                                        <td class="d-flex justify-content-end"><button class="btn btn-blue"
+                                                (click)="getRecordById(record.id)">View
+                                                Details</button></td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Record Details
+                                    </h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label for="specialist">Specialist</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="specialist"
+                                                [value]="record.specialist" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="observation">Observation</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="observation"
+                                                [value]="record.observation" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="prescription">Prescriptions</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <ul class="list-group">
+                                                <li class="list-group-item" *ngFor="let prescription of prescriptions">
+                                                    {{prescription}}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" (click)="closeModal()"
+                                        class="btn btn-light-primary">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Records Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

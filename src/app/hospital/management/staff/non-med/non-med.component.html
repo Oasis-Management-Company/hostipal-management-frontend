@@ -1,0 +1,741 @@
+<div class="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-3 ms-0">
+                <div class="page-title">
+                    <div class="row pb-3">
+                        <div class="col-12 col-md-8 order-md-1 order-last">
+                            <h3>Manage Non-Medical Staff</h3>
+                        </div>
+                        <div class="col-12 col-md-4 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Non-Medical Staff</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="notAuthorised">
+                    <strong class="col-11 text-danger mt-2">Access Denied. Your access is restricted, contact admin for
+                        clearance</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row pb-2 justify-content-start m-0 mt-3 mb-3">
+                    <div class="col-md-6 col-lg-3 col-12 form-group p-0 mb-0">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <select id="sort" class="form-control">
+                                    <option value="0">By ID</option>
+                                    <option value="1">By Name</option>
+                                    <option value="2">By Role</option>
+                                    <option value="3">By Rank</option>
+                                </select>
+                            </div>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-9 d-flex justify-content-end pe-0">
+                        <button class="btn btn-blue" (click)="add()">Add Staff</button>
+                    </div>
+                </div>
+                <div class="modal bg-opaque fade show" id="modal" *ngIf="addModal">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-blue">
+                                <h5 class="modal-title text-light">Staff
+                                    Registration</h5>
+                                <button class="btn" (click)="closeModal()"><span
+                                        class="text-light">&times;</span></button>
+                            </div>
+                            <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="registered">
+                                <strong class="col-11 text-success mt-2">New Staff Registered. Staff should check email for confirmation</strong>
+                                <button type="button" class="close col-1 text-success text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="registerFailed">
+                                <strong class="col-11 text-danger mt-2">Staff Registration Failed</strong>
+                                <button type="button" class="close col-1 text-danger text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="exists">
+                                <strong class="col-11 text-danger mt-2">Staff Already Exists</strong>
+                                <button type="button" class="close col-1 text-danger text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="mustSelect">
+                                <strong class="col-11 text-danger mt-2">Must select at least one day</strong>
+                                <button type="button" class="close col-1 text-danger text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <form class="form" [formGroup]="addForm" (ngSubmit)="addStaff()">
+                                <div class="modal-body">
+                                    <div class="row form-body">
+                                        <div class="row form-group pe-0">
+                                            <div class="col-md-2 pe-0">
+                                                <label for="name">Name</label>
+                                            </div>
+                                            <div class="col-md-10 pe-0">
+                                                <input type="text" class="form-control" name="name"
+                                                    formControlName="name">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(Aname?.touched) && (Aname?.invalid)">
+                                                    <span *ngIf="Aname?.errors?.['required']">This field is
+                                                        required.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-12">
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="id">Staff ID</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="id"
+                                                        formControlName="id">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(id?.touched) && (id?.invalid)">
+                                                        <span *ngIf="id?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="date">Date of Birth</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="date" class="form-control" name="date"
+                                                        formControlName="date">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(Adate?.touched) && (Adate?.invalid)">
+                                                        <span *ngIf="Adate?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="phone">Phone</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="phone"
+                                                        formControlName="phone">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(Aphone?.touched) && (Aphone?.invalid)">
+                                                        <span *ngIf="Aphone?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-12">
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="role">Role</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <select name="role" formControlName="role" class="form-control">
+                                                        <option disabled>--Select Role--</option>
+                                                        <option value="receptionist" selected>Receptionist</option>
+                                                        <option value="assistant">Assistant</option>
+                                                        <option value="intern">Intern</option>
+                                                    </select>
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(Arole?.touched) && (Arole?.invalid)">
+                                                        <span *ngIf="Arole?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="rank">Rank</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="rank"
+                                                        formControlName="rank">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(Arank?.touched) && (Arank?.invalid)">
+                                                        <span *ngIf="Arank?.errors?.['required']">This field is
+                                                            required.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-4">
+                                                    <label for="gender">Gender</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="btn-group">
+                                                        <input type="radio" id="male" name="gender"
+                                                            class="btn-check form-control" formControlName="gender"
+                                                            autocomplete="off" value="Male">
+                                                        <label for="male" class="btn btn-outline-dark">Male</label>
+                                                        <input type="radio" id="female" name="gender"
+                                                            class="btn-check form-control" formControlName="gender"
+                                                            autocomplete="off" value="Female">
+                                                        <label for="female" class="btn btn-outline-dark">Female</label>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(gender?.touched) && (gender?.invalid)">
+                                                            <span *ngIf="gender?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row pe-0">
+                                            <div class="col-md-2 pe-0">
+                                                <label for="email">Email</label>
+                                            </div>
+                                            <div class="col-md-10 pe-0">
+                                                <input type="email" class="form-control" name="email"
+                                                    formControlName="email">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(Aemail?.touched) && (Aemail?.invalid)">
+                                                    <span *ngIf="Aemail?.errors?.['required']">This field is
+                                                        required.</span>
+                                                    <span *ngIf="Aemail?.errors?.['email']">Incorrect email
+                                                        format.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group pe-0">
+                                            <div class="col-md-2 pe-0">
+                                                <label for="onDuty">On Duty</label>
+                                            </div>
+                                            <div class="col-md-10 pe-0">
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-2">
+                                                        <textarea rows="2" class="form-control" name="onDuty"
+                                                            [value]="selectedDays" disabled>
+                                                    </textarea>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Monday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Monday',$event)" name="mon">
+                                                        <label for="mon">Monday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Tuesday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Tuesday',$event)" name="tue">
+                                                        <label for="tue">Tuesday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Wednesday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Wednesday',$event)" name="wed">
+                                                        <label for="wed">Wednesday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Thurday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Thurday',$event)" name="thur">
+                                                        <label for="thur">Thursday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Friday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Friday',$event)" name="fri">
+                                                        <label for="fr">Friday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Saturday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Saturday',$event)" name="sat">
+                                                        <label for="sat">Saturday</label>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="checkbox" value="Sunday"
+                                                            class="form-check-input me-2"
+                                                            (change)="onChange('Sunday',$event)" name="sun">
+                                                        <label for="sun">Sunday</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" id="close" (click)="closeModal()"
+                                                class="btn btn-light-primary">Close</button>
+                                            <button type="submit" class="btn btn-blue"
+                                                [disabled]="addForm?.invalid">Register
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="staffs.length > 0; else notFound">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Staff ID</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Rank</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let staff of staffs">
+                                    <tr>
+                                        <td>{{staff.staffID}}</td>
+                                        <td>{{staff.name}}</td>
+                                        <td>
+                                            <ng-container *ngIf="staff.role == 'receptionist'">Receptionist
+                                            </ng-container>
+                                            <ng-container *ngIf="staff.role == 'assistant'">Assistant</ng-container>
+                                            <ng-container *ngIf="staff.role == 'intern'">Intern/NYSC</ng-container>
+                                        </td>
+                                        <td>{{staff.rank}}</td>
+                                        <td class="d-flex justify-content-end"><button class="btn btn-blue"
+                                                (click)="viewDetails(staff.staffID)">View</button>
+                                            <button class="btn btn-blue ms-1"
+                                                (click)="editDetails(staff.staffID)">Edit</button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">{{staff.name}}'s Details</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="d-flex justify-content-center m-3">
+                                    <button (click)="getStaffLogs(staff.staffID)" class="btn btn-blue col-12">View Staff
+                                        Activity</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 col-12">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="id">Staff ID</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="id"
+                                                        [value]="staff.staffID" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="date">Date of Birth</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="date" class="form-control" name="date"
+                                                        [value]="staff.dob" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="phone">Phone</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="phone"
+                                                        [value]="staff.phone" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-12">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="name">Name</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="name"
+                                                        [value]="staff.name" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="role">Role</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <select name="role" [(ngModel)]="staff.role" class="form-control"
+                                                        disabled>
+                                                        <option selected disabled>--Select Role--</option>
+                                                        <option value="receptionist"
+                                                            [selected]="'receptionist' === staff.role">
+                                                            Receptionist</option>
+                                                        <option value="assistant"
+                                                            [selected]="'assistant' === staff.role">
+                                                            Assistant
+                                                        </option>
+                                                        <option value="intern" [selected]="'intern' === staff.role">
+                                                            Intern
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="rank">Rank</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="rank"
+                                                        [value]="staff.rank" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2 pe-0">
+                                        <div class="col-md-2 pe-0">
+                                            <label for="onDuty">On Duty</label>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <textarea class="form-control" rows="2" name="onDuty" [value]="staff.onDuty"
+                                                disabled></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="row pe-0 mt-2">
+                                        <div class="col-md-2">
+                                            <label for="email">Email</label>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <input type="email" class="form-control" name="email" [value]="staff.email"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="close" (click)="closeModal()"
+                                        class="btn btn-light-primary">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="logModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">{{staff.name}}'s Activity Logs
+                                    </h5>
+                                    <button class="btn" (click)="closeLogs()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ng-container *ngIf="logs.length > 0; else noLogs">
+                                        <div class="row pb-2 justify-content-start m-0 mt-3">
+                                            <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                <label>Search</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <select id="sort2" class="form-control">
+                                                            <option value="0">By Date
+                                                            </option>
+                                                            <option value="2">By Description
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <input type="text" class="col-md-6 form-control" id="search2"
+                                                        onkeyup="search('table2')" placeholder="Search">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive list">
+                                            <table class="table table-hover" id="table1">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Activity</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <ng-container *ngFor="let log of logs">
+                                                        <tr>
+                                                            <td>{{log.date}}</td>
+                                                            <td>{{log.person}} {{log.activity}}</td>
+                                                            <td>{{log.description}}</td>
+                                                        </tr>
+                                                    </ng-container>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #noLogs>
+                                        <div class="p-3 text-center bg-light mb-3">No Activity Found</div>
+                                    </ng-template>
+                                    <div class="modal-footer p-0 pt-2">
+                                        <button type="button" (click)="closeLogs()"
+                                            class="btn btn-light-primary">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="editModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Edit Staff
+                                        Details</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="isUpdated">
+                                    <strong class="col-11 text-success mt-2">Staff Details Updated</strong>
+                                    <button type="button" class="close col-1 text-success text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="updateFailed">
+                                    <strong class="col-11 text-danger mt-2">Staff Details could not be
+                                        updated</strong>
+                                    <button type="button" class="close col-1 text-danger text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="invalid">
+                                    <strong class="col-11 text-danger mt-2">Invalid File Type. Only JPG, JPEG and PNG
+                                        Allowed</strong>
+                                    <button type="button" class="close col-1 text-danger text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="mustSelect">
+                                    <strong class="col-11 text-danger mt-2">Must select at least one day</strong>
+                                    <button type="button" class="close col-1 text-danger text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="row p-3 d-flex justify-content-start">
+                                    <ng-container *ngIf="staff.logo != null; else noImage">
+                                        <img fetchpriority="high" class="rounded float-start" [src]="staff.logo"
+                                            alt="Pic">
+                                    </ng-container>
+                                    <ng-template #noImage>
+                                        <img fetchpriority="high"
+                                            src="../../../../../assets/images/samples/tab-img-2.jpg"
+                                            class="rounded float-center col-md-6" alt="Pic">
+                                    </ng-template>
+                                    <div class="col-md-8">
+                                        <input type="file" class="mb-2 mt-2" (change)="onFileChanged($event)">
+                                        <button type="button" class="btn btn-blue"
+                                            (click)="onUpload(staff.staffID)">Upload</button>
+                                    </div>
+                                </div>
+                                <form class="form" [formGroup]="updateForm" (ngSubmit)="update(staff.staffID)">
+                                    <div class="modal-body">
+                                        <div class="row form-body">
+                                            <div class="col-md-6 col-12">
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="name">Name</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="name"
+                                                            formControlName="name" [(ngModel)]="staff.name">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(name?.touched) && (name?.invalid)">
+                                                            <span *ngIf="name?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="date">Date of Birth</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="date" class="form-control" name="date"
+                                                            formControlName="date" [(ngModel)]="staff.dob">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(date?.touched) && (date?.invalid)">
+                                                            <span *ngIf="date?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="phone">Phone</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="phone"
+                                                            formControlName="phone" [(ngModel)]="staff.phone">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(phone?.touched) && (phone?.invalid)">
+                                                            <span *ngIf="phone?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="role">Role</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select name="role" formControlName="role"
+                                                            [(ngModel)]="staff.role" class="form-control">
+                                                            <option selected disabled>--Select Role--</option>
+                                                            <option value="receptionist"
+                                                                [selected]="'receptionist' === staff.role">
+                                                                Receptionist</option>
+                                                            <option value="assistant"
+                                                                [selected]="'assistant' === staff.role">
+                                                                Assistant
+                                                            </option>
+                                                            <option value="intern" [selected]="'intern' === staff.role">
+                                                                Intern
+                                                            </option>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(role?.touched) && (role?.invalid)">
+                                                            <span *ngIf="role?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="rank">Rank</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="rank"
+                                                            formControlName="rank" [(ngModel)]="staff.rank">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(rank?.touched) && (rank?.invalid)">
+                                                            <span *ngIf="rank?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row pe-0">
+                                                <div class="col-md-2 pe-0">
+                                                    <label for="email">Email</label>
+                                                </div>
+                                                <div class="col-md-10 pe-0">
+                                                    <input type="email" class="form-control" name="email"
+                                                        formControlName="email" [(ngModel)]="staff.email">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(email?.touched) && (email?.invalid)">
+                                                        <span *ngIf="email?.errors?.['required']">This field is
+                                                            required.</span>
+                                                        <span *ngIf="email?.errors?.['email']">Incorrect email
+                                                            format.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group pe-0">
+                                                <div class="col-md-2 pe-0">
+                                                    <label for="onDuty">On Duty</label>
+                                                </div>
+                                                <div class="col-md-10 pe-0">
+                                                    <div class="row">
+                                                        <div class="col-md-12 mb-2">
+                                                            <textarea rows="2" class="form-control" name="onDuty"
+                                                                [value]="selectedDays" disabled>
+                                                        </textarea>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Monday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Monday')"
+                                                                (change)="onChange('Monday',$event)" name="mon">
+                                                            <label for="mon">Monday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Tuesday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Tuesday')"
+                                                                (change)="onChange('Tuesday',$event)" name="tue">
+                                                            <label for="tue">Tuesday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Wednesday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Wednesday')"
+                                                                (change)="onChange('Wednesday',$event)" name="wed">
+                                                            <label for="wed">Wednesday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Thurday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Thurday')"
+                                                                (change)="onChange('Thurday',$event)" name="thur">
+                                                            <label for="thur">Thursday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Friday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Friday')"
+                                                                (change)="onChange('Friday',$event)" name="fri">
+                                                            <label for="fr">Friday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Saturday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Saturday')"
+                                                                (change)="onChange('Saturday',$event)" name="sat">
+                                                            <label for="sat">Saturday</label>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <input type="checkbox" value="Sunday"
+                                                                class="form-check-input me-2"
+                                                                [checked]="staff.onDuty.includes('Sunday')"
+                                                                (change)="onChange('Sunday',$event)" name="sun">
+                                                            <label for="sun">Sunday</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-6 form-check form-switch ms-3">
+                                                <label for="disable">Disable Account</label>
+                                                <input type="checkbox" class="form-check-input"
+                                                    [(ngModel)]="staff.deactivate" name="disable"
+                                                    formControlName="disable">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" id="close" (click)="closeModal()"
+                                                    class="btn btn-light-primary">Close</button>
+                                                <button type="submit" class="btn btn-blue">Save
+                                                    Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Staff Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,9 @@
+@media print {
+    .hidden-print {
+      display: block !important;
+    }
+  }
+
+h4.day{
+  cursor: pointer;
+}

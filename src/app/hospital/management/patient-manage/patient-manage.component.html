@@ -1,0 +1,517 @@
+<div class="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-3 ms-0">
+                <div class="page-title">
+                    <div class="row pb-3">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>Manage Patients</h3>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Patients</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="notAuthorised">
+                    <strong class="col-11 text-danger mt-2">Access Denied. Your access is restricted, contact admin for
+                        clearance</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="isupdated">
+                    <strong class="col-11 text-success mt-2">Patient Details Updated</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="updateFailure">
+                    <strong class="col-11 text-danger mt-2">Patient Details could not be updated</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row pb-2 justify-content-start m-0 mt-3">
+                    <div class="col-md-6 col-lg-3 col-12 form-group p-0">
+                        <label>Search</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <select id="sort" class="form-control">
+                                    <option value="0">By Name</option>
+                                    <option value="1">By Age</option>
+                                    <option value="3">By Weight</option>
+                                </select>
+                            </div>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="patients.length > 0; else notFound">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>Height (inch)</th>
+                                    <th>Weight (kg)</th>
+                                    <th>Phone Number</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let patient of patients">
+                                    <tr>
+                                        <td>{{patient.fname}} {{patient.lname}}</td>
+                                        <td>{{patient.age}}</td>
+                                        <td>
+                                            <ng-container *ngIf="patient.height === 0; else exists">-</ng-container>
+                                            <ng-template #exists>{{patient.height}}</ng-template>
+                                        </td>
+                                        <td>
+                                            <ng-container *ngIf="patient.weight === 0; else weight">-</ng-container>
+                                            <ng-template #weight>{{patient.weight}}</ng-template>
+                                        </td>
+                                        <td>{{patient.phone}}</td>
+                                        <td><button class="btn btn-blue" (click)="viewDetails(patient.id)">View</button>
+                                            <button class="btn btn-blue ms-1"
+                                                (click)="editDetails(patient.id)">Edit</button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="viewModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Patient Details</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="d-flex justify-content-center m-3">
+                                    <button (click)="getRecords(patient.id)" class="btn btn-blue col-12">View Patient
+                                        Records</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 col-12">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="id">Patient ID</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="id"
+                                                        [value]="patient.id" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="name">First Name</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="name"
+                                                        [value]="patient.fname" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="name">Last Name</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="name"
+                                                        [value]="patient.lname" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="date">Date of Birth</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="date" class="form-control" name="date"
+                                                        [value]="patient.dob" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="age">Age</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="age"
+                                                        [value]="patient.age" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="address">Address</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <textarea class="form-control" cols="3" name="address"
+                                                        [value]="patient.address" disabled></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="phone">Phone</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="phone"
+                                                        [value]="patient.phone" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-12">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="gender">Gender</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="gender"
+                                                        [value]="patient.gender" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="id-type">ID Type</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="id-type"
+                                                        [value]="patient.id_type" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="id-no">ID Number</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="id-no"
+                                                        [value]="patient.id_no" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="height">Height</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="height"
+                                                        [value]="patient.height" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="weight">Weight</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="weight"
+                                                        [value]="patient.weight" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label for="blood-t">Blood Type</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="blood-t"
+                                                        [value]="patient.bloodType" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="blood-g">Blood Group</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control" name="blood-g"
+                                                        [value]="patient.bloodGroup" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row pe-0 mt-2">
+                                            <div class="col-md-2">
+                                                <label for="email">Email</label>
+                                            </div>
+                                            <div class="col-md-10 pe-0">
+                                                <input type="email" class="form-control" name="email"
+                                                    [value]="patient.email" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer p-0 pt-2">
+                                        <button type="button" id="close" (click)="closeModal()"
+                                            class="btn btn-light-primary">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="recordModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">{{patient.fname}} {{patient.lname}}'s Records
+                                    </h5>
+                                    <button class="btn" (click)="closeRecords()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ng-container *ngIf="records.length > 0; else noRecord">
+                                        <div class="row pb-2 justify-content-start m-0 mt-3">
+                                            <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                <label>Search</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <select id="sort2" class="form-control">
+                                                            <option value="0">By Date</option>
+                                                            <option value="2">By Doctor</option>
+                                                            <option value="3">By Diagnosis</option>
+                                                        </select>
+                                                    </div>
+                                                    <input type="text" class="col-md-6 form-control" id="search2"
+                                                        onkeyup="search('table2')" placeholder="Search">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-responsive list">
+                                            <table class="table table-hover" id="table2">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Observation</th>
+                                                        <th>Doctor Name</th>
+                                                        <th>Diagnosis</th>
+                                                        <th>Prescription</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <ng-container *ngFor="let record of records">
+                                                        <tr>
+                                                            <td>{{record.date}}</td>
+                                                            <td>{{record.observation}}</td>
+                                                            <td>{{record.doctorName}}</td>
+                                                            <td>{{record.diagnosis}}</td>
+                                                            <td>{{record.prescriptions}}</td>
+                                                        </tr>
+                                                    </ng-container>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #noRecord>
+                                        <div class="p-3 text-center bg-light mb-3">No Record Found
+                                        </div>
+                                    </ng-template>
+                                    <div class="modal-footer p-0 pt-2">
+                                        <button type="button" (click)="closeRecords()"
+                                            class="btn btn-light-primary">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="editModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Edit Patient
+                                        Details</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <form [formGroup]="updateForm" (ngSubmit)="update(patient.id)" class="form">
+                                    <div class="modal-body">
+                                        <div class="row form-body">
+                                            <div class="col-md-6 col-12">
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="fname">First Name</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="fname"
+                                                            formControlName="fname" [(ngModel)]="patient.fname">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(fname?.touched) && (fname?.invalid)">
+                                                            <span *ngIf="fname?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="lname">Last Name</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="lname"
+                                                            formControlName="lname" [(ngModel)]="patient.lname">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(lname?.touched) && (lname?.invalid)">
+                                                            <span *ngIf="lname?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="date">Date of
+                                                            Birth</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="date" class="form-control" name="date"
+                                                            formControlName="date" [(ngModel)]="patient.dob">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(dob?.touched) && (dob?.invalid)">
+                                                            <span *ngIf="dob?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="phone">Phone</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="phone"
+                                                            formControlName="phone" [(ngModel)]="patient.phone">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(phone?.touched) && (phone?.invalid)">
+                                                            <span *ngIf="phone?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="gender">Gender</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control" name="gender"
+                                                            [(ngModel)]="patient.gender" formControlName="gender">
+                                                            <option value="Female"
+                                                                [selected]="'Female' == patient.gender">
+                                                                Female
+                                                            </option>
+                                                            <option value="Male" [selected]="'Male' == patient.gender">
+                                                                Male
+                                                            </option>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(gender?.touched) && (gender?.invalid)">
+                                                            <span *ngIf="gender?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="id-type">ID Type</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select name="id-type" class="form-control"
+                                                            formControlName="id_type" [(ngModel)]="patient.id_type">
+                                                            <option selected disabled>Select ID Type</option>
+                                                            <option value="Driver's Licence">Driver's Licence</option>
+                                                            <option value="National ID Card">National ID Card</option>
+                                                            <option value="International Passport">International
+                                                                Passport
+                                                            </option>
+                                                            <option value="Voter's Card">Voter's Card</option>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(id_type?.touched) && (id_type?.invalid)">
+                                                            <span *ngIf="id_type?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="id-no">ID Number</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <input type="text" class="form-control" name="id-type"
+                                                            formControlName="id_no" [(ngModel)]="patient.id_no">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(id_no?.touched) && (id_no?.invalid)">
+                                                            <span *ngIf="id_no?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-4">
+                                                        <label for="address">Address</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <textarea class="form-control" cols="3" name="date"
+                                                            formControlName="address"
+                                                            [(ngModel)]="patient.address"></textarea>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(address?.touched) && (address?.invalid)">
+                                                            <span *ngIf="address?.errors?.['required']">This field
+                                                                is required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row pe-0">
+                                                <div class="col-md-2 pe-0">
+                                                    <label for="email">Email</label>
+                                                </div>
+                                                <div class="col-md-10 pe-0">
+                                                    <input type="email" class="form-control" name="email"
+                                                        formControlName="email" [(ngModel)]="patient.email">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(email?.touched) && (email?.invalid)">
+                                                        <span *ngIf="email?.errors?.['required']">This field
+                                                            is required.</span>
+                                                            <span *ngIf="email?.errors?.['email']">Incorrect email
+                                                                format.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col-md-6 col-6 form-check form-switch ms-3">
+                                                    <label for="disable">Disable Account</label>
+                                                    <input type="checkbox" class="form-check-input"
+                                                        [(ngModel)]="patient.deactivate" name="disable"
+                                                        formControlName="disable">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" id="close" (click)="closeModal()"
+                                                    class="btn btn-light-primary">Close</button>
+                                                <button type="submit" class="btn btn-blue">Save
+                                                    Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Patient Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

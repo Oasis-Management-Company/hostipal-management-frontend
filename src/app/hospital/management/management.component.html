@@ -1,0 +1,173 @@
+<div id="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-content">
+            <div class="row">
+                <div class="col-12 col-lg-4 col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon red">
+                                        <i class="iconify" data-icon="bi:person-fill" style="color: white;"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Patients</h6>
+                                    <p class="text-muted font-semibold">{{patients.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon" style="background-color: #5785fe;">
+                                        <span class="iconify" data-icon="fa6-solid:user-doctor"
+                                            style="color: white;"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Doctors</h6>
+                                    <p class="text-muted font-semibold">{{doctors.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon" style="background-color: #050a30;">
+                                        <i class="iconify" data-icon="bi:person-fill" style="color: white;"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Staff Members</h6>
+                                    <p class="text-muted font-semibold">{{staffs.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-7 col-md-7 chart">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5 col-md-5">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5>Today's Statistics</h5>
+                                <div>{{ date }}</div>
+                            </div>
+                            <div class="row alert alert-light-primary alert-dismissible m-0 mb-3 p-2 show" role="alert">
+                                <strong class="col-9 col-md-9 text-primary">Appointments</strong>
+                                <div class="col-3 col-md-3 text-primary font-semibold">{{appointments.length}}</div>
+                            </div>
+                            <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert">
+                                <strong class="col-9 col-md-9 text-success">Walk-ins</strong>
+                                <div class="col-3 col-md-3 text-success font-semibold">{{visits.length}}</div>
+                            </div>
+                            <div class="row alert alert-light-warning alert-dismissible m-0 mb-3 p-2 show" role="alert">
+                                <strong class="col-9 col-md-9 text-warning">Available Staff</strong>
+                                <div class="col-3 col-md-3 text-warning font-semibold">{{availableStaffs.length}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row card p-4 m-0">
+                <div class="page-title">
+                    <h3>Recent Activity</h3>
+                    <p></p>
+                </div>
+                <ng-container *ngIf="logs.length > 0; else notFound">
+                    <div class="row pb-2 m-0 mt-3">
+                        <div class="col-lg-3 col-md-6 col-12 form-group p-0">
+                            <label>Search</label>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search1()"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                    <table id="table1">
+                        <tr *ngFor="let log of logs | slice:0:7">
+                            <td>
+                                <ng-container *ngIf="log.type === 'appointment'">
+                                    <div class="row alert alert-light-primary m-2 mb-3 p-2 show" role="alert"
+                                        id="alert">
+                                        <strong class="col-11 text-primary mt-2">{{log.person}}
+                                            {{log.activity}}</strong>
+                                        <a class="accordion col-1 text-primary btn"><span class="iconify-inline"
+                                                data-icon="fa6-solid:circle-info" onclick="accordion()"></span></a>
+                                        <h6 class="panel text-secondary">
+                                            <div class="col-md-10">{{log.description}}</div>
+                                            <div class="col-md-2 d-flex justify-content-end">{{log.date}}</div>
+                                        </h6>
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="log.type === 'payment'">
+                                    <div class="row alert alert-light-success m-2 mb-3 p-2 show" role="alert"
+                                        id="alert">
+                                        <strong class="col-11 text-success mt-2">{{log.person}}
+                                            {{log.activity}}</strong>
+                                        <a class="accordion col-1 text-success btn"><span class="iconify-inline"
+                                                data-icon="fa6-solid:circle-info" onclick="accordion()"></span></a>
+                                        <h6 class="panel text-secondary">
+                                            <div class="col-md-10">{{log.description}}</div>
+                                            <div class="col-md-2 d-flex justify-content-end">{{log.date}}</div>
+                                        </h6>
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="log.type === 'dispense'">
+                                    <div class="row alert alert-light-warning m-2 mb-3 p-2 show" role="alert"
+                                        id="alert">
+                                        <strong class="col-11 text-warning mt-2">{{log.person}}
+                                            {{log.activity}}</strong>
+                                        <a class="accordion col-1 text-warning btn"><span class="iconify-inline"
+                                                data-icon="fa6-solid:circle-info" onclick="accordion()"></span></a>
+                                        <h6 class="panel text-secondary">
+                                            <div class="col-md-10">{{log.description}}</div>
+                                            <div class="col-md-2 d-flex justify-content-end">{{log.date}}</div>
+                                        </h6>
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="log.type === 'regular'">
+                                    <div class="row alert alert-light-secondary m-2 mb-3 p-2 show" role="alert"
+                                        id="alert">
+                                        <strong class="col-11 text-secondary mt-2">{{log.person}}
+                                            {{log.activity}}</strong>
+                                        <a class="accordion col-1 text-secondary btn"><span class="iconify-inline"
+                                                data-icon="fa6-solid:circle-info" onclick="accordion()"></span></a>
+                                        <h6 class="panel text-secondary">
+                                            <div class="col-md-10">{{log.description}}</div>
+                                            <div class="col-md-2 d-flex justify-content-end">{{log.date}}</div>
+                                        </h6>
+                                    </div>
+                                </ng-container>
+                            </td>
+                        </tr>
+                    </table>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Recent Activity</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

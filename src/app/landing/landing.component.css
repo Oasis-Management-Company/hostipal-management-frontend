@@ -1,0 +1,11 @@
+@import "../../assets/icons/venobox.css";
+@import "../../assets/css/responsive.css";
+@import "../../assets/css/style.css";
+@import "../../assets/css/plugin_theme_css.css";
+
+.button{
+    display: inline-block;
+}
+.btn{
+    margin-left: 20px;
+}

@@ -1,0 +1,52 @@
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <a [routerLink]="['/dashboard',id]"><img *ngIf="image != null; else noImage" [src]="image" alt="Logo">
+                    <ng-template #noImage>
+                        <img fetchpriority="high" src="../../../assets/images/logo/OASIS.png" alt="Logo">
+                    </ng-template>
+                </a>
+                <div class="toggler">
+                    <a class="sidebar-hide d-xl-none d-block" onclick="sidebar()"><span class="iconify" data-icon="bi:x"
+                            style="color: grey;"></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu mt-3">
+                <li class="sidebar-item" routerLinkActive="active">
+                    <a [routerLink]="['/dashboard',id]" class='sidebar-link'>
+                        <i class="iconify" data-icon="bi:person-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item" routerLinkActive="active">
+                    <a [routerLink]="['/record',id]" class='sidebar-link'>
+                        <i class="iconify" data-icon="fluent:history-16-filled"></i>
+                        <span>Records</span>
+                    </a>
+                </li>
+                <li class="sidebar-item" routerLinkActive="active">
+                    <a [routerLink]="['/appointment',id]" class='sidebar-link'>
+                        <i class="iconify" data-icon="healthicons:i-schedule-school-date-time-outline"></i>
+                        <span>Appointments</span>
+                    </a>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-1')">
+                        <i class="iconify" data-icon="fluent:checkbox-person-16-regular"></i>
+                        <span>Authentication</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-1">
+                        <li class="submenu-item">
+                            <a class="text-danger" (click)="logout()">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="sidebar-bg" class="sidebar-backdrop d-xl-none" onclick="sidebar()"></div>

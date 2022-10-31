@@ -1,0 +1,116 @@
+<div class="app auth">
+    <div class="page-content">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6 col-lg-4 col-8  p-4 pe-5 ps-5 card mt-5" *ngIf="!forgotPass">
+                <h2 class="font-bold">Staff Login</h2>
+                <h6 class="font-semibold text-muted">Select the hospital and fill in credentials</h6>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="loginError">
+                    <strong class="col-10 text-danger mt-2">Login Error. Invalid credentials</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <form class="form mt-1" [formGroup]="loginForm" (ngSubmit)="login()">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label for="hospitalID">Hospital Name</label>
+                            <select class="form-control" formControlName="hospitalID" id="select">
+                                <ng-container *ngIf="hospitals.length > 0; else notFound">
+                                    <option selected disabled>--Select Hospital--</option>
+                                    <option *ngFor="let hospital of hospitals" value="{{hospital.hospitalID}}" selected>
+                                        {{hospital.name}}</option>
+                                </ng-container>
+                                <ng-template #notFound>
+                                    <option selected disabled>No Hospital Found</option>
+                                </ng-template>
+                            </select>
+                            <div class="alert alert-danger p-2" *ngIf="(hospitalID?.touched) && (hospitalID?.invalid)">
+                                <span *ngIf="hospitalID?.errors?.['required']">This field is
+                                    required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="id" class="form-control" placeholder="Staff ID"
+                                formControlName="staffID">
+                            <div class="alert alert-danger p-2" *ngIf="(staffID?.touched) && (staffID?.invalid)">
+                                <span *ngIf="staffID?.errors?.['required']">This field is
+                                    required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control" placeholder="Password"
+                                formControlName="password">
+                            <div class="alert alert-danger p-2" *ngIf="(password?.touched) && (password?.invalid)">
+                                <span *ngIf="password?.errors?.['required']">This field is
+                                    required.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="font-semibold text-muted">Do not have an account? Register <a
+                            [routerLink]="['/hospital']" class="blue">here</a>.
+                    </div>
+                    <div class="font-semibold text-muted mb-4">Forgot your password? Click <a class="blue"
+                            (click)="forgotPassword()">here</a>.
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5">
+                        <button type="submit" class="btn btn-blue me-1">Login</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 col-lg-4 col-8  p-4 pe-5 ps-5 card mt-5" *ngIf="forgotPass">
+                <h2 class="font-bold">Forgot Password</h2>
+                <div class="font-semibold text-muted mb-4">Remember your password? Click <a class="blue"
+                        (click)="remember()">here</a>.
+                </div>
+                <form class="form mt-1" [formGroup]="forgotForm" (ngSubmit)="forgot()">
+                    <div class="row alert alert-light-success alert-dismissible p-2 show" role="alert" id="alert"
+                        *ngIf="success">
+                        <strong class="col-11  text-success">Email Sent. Check email for next step</strong>
+                        <button type="button" class="close col-1 text-center text-success btn p-0"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="row alert alert-light-danger alert-dismissible p-2 show" role="alert" id="alert"
+                        *ngIf="error">
+                        <strong class="col-11 mt-2 text-danger">Account does not exist</strong>
+                        <button type="button" class="close col-1 text-center text-danger btn"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label for="hospitalID">Hospital Name</label>
+                            <select class="form-control" formControlName="hospitalID" id="select">
+                                <ng-container *ngIf="hospitals.length > 0; else notFound">
+                                    <option selected disabled>--Select Hospital--</option>
+                                    <option *ngFor="let hospital of hospitals" value="{{hospital.hospitalID}}" selected>
+                                        {{hospital.name}}</option>
+                                </ng-container>
+                                <ng-template #notFound>
+                                    <option selected disabled>No Hospital Found</option>
+                                </ng-template>
+                            </select>
+                            <div class="alert alert-danger p-2"
+                                *ngIf="(FhospitalID?.touched) && (FhospitalID?.invalid)">
+                                <span *ngIf="FhospitalID?.errors?.['required']">This field is
+                                    required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control" placeholder="Email"
+                                formControlName="email">
+                            <div class="alert alert-danger p-2" *ngIf="(Femail?.touched) && (Femail?.invalid)">
+                                <span *ngIf="Femail?.errors?.['required']">This field is
+                                    required.</span>
+                                <span *ngIf="Femail?.errors?.['email']">Incorrect email syntax.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5">
+                        <button type="submit" class="btn btn-blue me-1">Submit</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

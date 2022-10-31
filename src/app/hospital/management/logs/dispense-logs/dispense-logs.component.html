@@ -1,0 +1,66 @@
+<div id="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-3 ms-0">
+                <div class="page-title">
+                    <div class="row pb-3">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>Dispense Logs</h3>
+                            <p></p>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Dispense Logs</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="logs.length > 0; else notFound">
+                    <div class="row pb-2 m-0 mt-3">
+                        <div class="col-lg-2 col-md-6 col-12 form-group p-0">
+                            <label>Search</label>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search1()"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="table-responsive p-0">
+                        <table id="table1" class="col-12">
+                            <tr *ngFor="let log of logs">
+                                <td>
+                                    <div class="row alert alert-light-secondary m-2 mb-3 p-2 show" role="alert"
+                                        id="alert">
+                                        <strong class="col-11 text-secondary mt-2">{{log.person}}
+                                            {{log.activity}}</strong>
+                                        <a class="accordion col-1 text-secondary btn"><span class="iconify-inline"
+                                                data-icon="fa6-solid:circle-info" onclick="accordion()"></span></a>
+                                        <h6 class="panel text-secondary row">
+                                            <div class="col-md-10">{{log.description}}</div>
+                                            <div class="col-md-2 d-flex justify-content-end">{{log.date}}</div>
+                                        </h6>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Logs Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

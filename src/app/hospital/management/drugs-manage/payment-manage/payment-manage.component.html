@@ -1,0 +1,160 @@
+<div id="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-4 ms-0">
+                <div class="page-title">
+                    <div class="row pb-2">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>Pending Payment</h3>
+                            <h6 class="font-semibold">Contact patients with unconfirmed or pending payments</h6>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Pending Payment</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="payments.length > 0; else notFound">
+                    <div class="row pb-2 justify-content-start m-0 mt-3">
+                        <div class="col-md-6 col-lg-3 col-12 form-group p-0">
+                            <label>Search</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <select id="sort" class="form-control">
+                                        <option value="0">By Date</option>
+                                        <option value="1">By ID</option>
+                                        <option value="2">By Name</option>
+                                        <option value="4">By Status</option>
+                                    </select>
+                                </div>
+                                <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                    placeholder="Search">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reference ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Payment Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let payment of payments">
+                                    <td>{{payment.date}}</td>
+                                    <td>{{payment.referenceID}}</td>
+                                    <td>{{payment.patientName}}</td>
+                                    <td>{{payment.paymentType}}</td>
+                                    <ng-container *ngIf="payment.status === 0; else Paid">
+                                        <td><span class="badge text-danger">Not Paid</span></td>
+                                    </ng-container>
+                                    <ng-template #Paid>
+                                        <td><span class="badge text-success">Paid</span></td>
+                                        <td class="d-flex justify-content-end"><button (click)="getRecord(payment.recordID)"
+                                                class="btn btn-blue">View Details</button></td>
+                                    </ng-template>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Payment Details
+                                    </h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label for="id">Pharmacist ID</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="id"
+                                                [value]="payment.pharmacistID" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="name">Staff Name</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="name"
+                                                [value]="payment.staffName" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="name">Cost</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="name"
+                                                [value]="record.costOfTreatment" disabled>
+                                        </div>
+                                    </div>
+                                    <h5 class="font-bold mt-3">Contact Details</h5>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label for="email">Email</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="email" [value]="patient.email"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="phone">Phone Number</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="date" [value]="patient.phone"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label for="address">Address</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <textarea class="form-control" cols="3" name="address"
+                                                [value]="patient.address" disabled></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer p-3">
+                                    <button type="button" (click)="closeModal()"
+                                        class="btn btn-light-primary">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3 mt-3">No Payment Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

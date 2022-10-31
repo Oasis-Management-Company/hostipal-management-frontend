@@ -1,0 +1,244 @@
+/* .text-dark {
+    color: rgba(0, 0, 0, 0.58);
+} */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300&display=swap');
+
+body {
+    overflow-y: auto;
+    background-color: #f2f6fd;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+body .app.auth {
+    display: block;
+    height: 100%;
+}
+
+.modal{
+    overflow-y: scroll;
+}
+
+
+body .app.auth::before {
+    content: "";
+    background-image: url(assets/images/samples/slider-3.jpg) !important;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    opacity: .6;
+}
+
+.day.bg-white{
+    font-size: 1.3rem !important;
+}
+
+.table-responsive::-webkit-scrollbar {
+    width: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.sidebar-item.has-sub .submenu {
+    display: none;
+}
+
+.sidebar.sidebar-backdrop {
+    visibility: hidden;
+}
+
+.card .table-responsive {
+    height: 550px;
+    overflow-y: auto;
+}
+
+.card .modal .table-responsive {
+    height: 400px;
+    overflow-y: auto;
+}
+
+.modal {
+    transition: .2s;
+}
+
+label {
+    color: rgba(35, 28, 99, .7);
+    font-weight: 600;
+}
+
+@media screen and (max-width: 500px) {
+    .sidebar {
+        transition: .2s;
+        display: none;
+        opacity: 0;
+    }
+
+    .sidebar.active {
+        display: block;
+    }
+
+    .sidebar.active .sidebar-backdrop {
+        display: block;
+    }
+
+    .chart {
+        display: none;
+    }
+
+    .card .table-responsive {
+        height: 800px;
+        overflow-y: auto;
+    }
+}
+
+.sidebar-wrapper {
+    position: fixed;
+    height: 100%;
+}
+
+.sidebar-wrapper .menu .sidebar-item.active>.sidebar-link {
+    background-color: #050a30;
+}
+
+.sidebar-wrapper .menu .sidebar-link {
+    color: #050a30;
+}
+
+.sidebar-wrapper .sidebar-header img {
+    width: 100%;
+    height: 100%;
+}
+
+h3 {
+    font-weight: 700;
+}
+
+.submenu {
+    display: none;
+    padding-left: 8px;
+}
+
+.card {
+    border-radius: 0.2rem;
+}
+
+.card-header {
+    background: none;
+}
+
+button.btn-blue {
+    background-color: #050a30;
+    color: white;
+}
+
+.btn-blue:hover {
+    color: white;
+    cursor: pointer;
+}
+
+button.bagde {
+    border: none;
+}
+
+a:hover {
+    cursor: pointer;
+}
+
+a.blue {
+    color: #050a30;
+}
+
+.badge-success {
+    background-color: green;
+    border: green;
+    color: white;
+}
+
+.badge-danger {
+    background-color: red;
+    border: red;
+    color: white;
+}
+
+.badge-warning {
+    background-color: orange;
+    border: orange;
+    color: white;
+}
+
+.badge-muted {
+    background-color: #6c757d;
+    border: #6c757d;
+    color: white;
+}
+
+.badge-primary {
+    background-color: #0d6efd;
+    border: #0d6efd;
+    color: white;
+}
+
+table {
+    border-radius: 0.5rem;
+}
+
+input.invalid {
+    background-color: #ffdddd;
+}
+
+.bg-blue {
+    background-color: #050a30;
+    color: white;
+}
+
+.text-blue {
+    color: #050a30;
+}
+
+.modal.bg-opaque {
+    background-color: rgba(0, 0, 0, 0.4);
+    display: block;
+}
+
+.form-check-input:checked {
+    background-color: #050a30;
+    border-color: #050a30;
+}
+
+svg.iconify {
+    height: 25px;
+    width: 25px;
+}
+
+.menu li.sidebar-link.active {
+    background-color: #050a30;
+    color: white;
+    border-radius: .4rem;
+}
+
+.panel,
+.submenu {
+    display: none;
+}
+
+option:target {
+    background-color: #0d6efd;
+    color: white;
+}

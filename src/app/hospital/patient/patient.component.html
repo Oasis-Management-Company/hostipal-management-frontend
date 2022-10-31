@@ -1,0 +1,294 @@
+<div class="app">
+    <app-hospital-sidebar></app-hospital-sidebar>
+    <div id="main" class="row p-0">
+        <header class="col-4">
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="col-8 page-heading m-0 d-flex justify-content-end">
+            <h6>{{date}}</h6>
+        </div>
+        <div class="page-content">
+            <div class="row ms-0">
+                <div class="col-12 col-lg-4 col-md-4 p-1">
+                    <div class="card mb-2">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon red">
+                                        <i class="iconify" data-icon="bi:person-fill" style="color: white;"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Walk-Ins</h6>
+                                    <p class="text-muted font-semibold">{{visits.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-md-4 p-1">
+                    <div class="card mb-2">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon" style="background-color: #5785fe;">
+                                        <i class="iconify" data-icon="healthicons:i-schedule-school-date-time-outline"
+                                            style="color: white;"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Appointments</h6>
+                                    <p class="text-muted font-semibold">{{appointments.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-md-4 p-1">
+                    <div class="card mb-2">
+                        <div class="card-body pb-0">
+                            <div class="row">
+                                <div class="col-md-4 col-4">
+                                    <div class="stats-icon" style="background-color: #050a30;">
+                                        <span class="iconify" data-icon="oi:timer" style="color: white;"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-8">
+                                    <h6 class="text-muted font-semibold">Waiting</h6>
+                                    <p class="text-muted font-semibold">{{waiting.length}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row ms-0">
+                <div class="col-lg-8 col-md-8 chart p-1">
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 col-md-4 p-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row d-flex align-items-center">
+                                <div class="col-3 col-md-3 col-lg-2 avatar avatar-lg">
+                                    <ng-container *ngIf="image != null; else noImage">
+                                        <img fetchpriority="high" [src]="image" alt="Pic">
+                                    </ng-container>
+                                    <ng-template #noImage>
+                                        <img src="../../assets/images/faces/1.jpg" alt="Face 1">
+                                    </ng-template>
+                                </div>
+                                <div class="col-8 col-md-8 m-0 ms-3 p-0 name">
+                                    <ng-container *ngIf="staff.role == 'nurse'">
+                                        <h5 class="font-semibold">Nurse {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'pharmacist'">
+                                        <h5 class="font-semibold">Pharmacist {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'receptionist'">
+                                        <h5 class="font-semibold">Receptionist {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'assistant'">
+                                        <h5 class="font-semibold">Assistant {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'intern'">
+                                        <h5 class="font-semibold">Intern {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'doctor'">
+                                        <h5 class="font-semibold">Dr. {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <ng-container *ngIf="staff.role == 'medLab'">
+                                        <h5 class="font-semibold">Lab. {{staff.staffID}}</h5>
+                                    </ng-container>
+                                    <h6 class="text-muted font-semibold">{{staff.rank}}</h6>
+                                </div>
+                            </div>
+                            <table class="table table-hover">
+                                <tbody>
+                                    <tr>
+                                        <th>Name</th>
+                                        <td>{{staff.name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Date of Birth</th>
+                                        <td>{{staff.dob}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Type</th>
+                                        <td>
+                                            <ng-container *ngIf="staff.type == 'medical';else regular">Medical Staff
+                                            </ng-container>
+                                            <ng-template #regular>Non-Medical</ng-template>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div (click)="openModal()" class="btn d-flex justify-content-center text-light bg-blue">
+                                <span class="iconify" data-icon="bxs:edit-alt" style="color: white;"></span>Edit Profile
+                            </div>
+                            <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-blue">
+                                            <h5 class="modal-title text-light">Change Password</h5>
+                                            <button class="btn" (click)="closeModal()"><span
+                                                    class="text-light">&times;</span></button>
+                                        </div>
+                                        <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                            role="alert" id="alert" *ngIf="passChanged">
+                                            <strong class="col-11 text-success mt-2">Password Changed</strong>
+                                            <button type="button" class="close col-1 text-success text-center btn"
+                                                (click)="dismissAlert()">&times;</button>
+                                        </div>
+                                        <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                            role="alert" id="alert" *ngIf="changeFailed">
+                                            <strong class="col-11 text-danger mt-2">Could not change
+                                                password</strong>
+                                            <button type="button" class="close col-1 text-danger text-center btn"
+                                                (click)="dismissAlert()">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form [formGroup]="changePass" (ngSubmit)="changePassword()" class="form">
+                                                <div class="form-body">
+                                                    <div class="form-group">
+                                                        <label for="password">Old Password</label>
+                                                        <input type="password" class="form-control" name="password"
+                                                            formControlName="password">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(password?.touched) && ((password?.invalid) || isNotPassword)">
+                                                            <span *ngIf="password?.errors?.['required']">This field
+                                                                is required.</span>
+                                                            <span *ngIf="isNotPassword">
+                                                                Incorrect Password.
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="password1">New Password</label>
+                                                            <input type="password" class="form-control" name="password1"
+                                                                formControlName="password1">
+                                                            <div class="alert alert-danger p-2"
+                                                                *ngIf="(password1?.touched) && (password1?.invalid)">
+                                                                <span *ngIf="password1?.errors?.['required']">This field
+                                                                    is required.</span>
+                                                                <span *ngIf="password1?.errors?.['minlength']">
+                                                                    Password is too short.
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group mb-4">
+                                                            <label for="password2">Confirm Password</label>
+                                                            <input type="password" class="form-control" name="password2"
+                                                                formControlName="password2">
+                                                            <div class="alert alert-danger p-2"
+                                                                (change)="checkPassword()"
+                                                                *ngIf="(password2?.touched) && (password2?.invalid || notEqual)">
+                                                                <span *ngIf="password2?.errors?.['required']">This
+                                                                    field is required.</span>
+                                                                <span *ngIf="notEqual">
+                                                                    Password must match.
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer pe-0">
+                                                    <button type="button" id="close" (click)="closeModal()"
+                                                        class="btn btn-light-primary">Close</button>
+                                                    <button type="submit" class="btn btn-blue"
+                                                        [disabled]="changePass?.invalid">Change
+                                                        Password</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row ms-0">
+                <div class="col-12 col-lg-12 p-1">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Scheduled Appointments</h3>
+                            <hr>
+                            <ng-container *ngIf="appointments.length > 0; else notFound">
+                                <div class="row pb-2 justify-content-start m-0">
+                                    <div class="col-md-6 col-12 col-lg-3 form-group p-0">
+                                        <label>Search</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <select id="sort" class="form-control">
+                                                    <option value="0">By Time</option>
+                                                    <option value="1">By Name</option>
+                                                    <option value="3">By Specialist</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="col-md-6 form-control" id="search"
+                                                onkeyup="search('table1')" placeholder="Search">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive list">
+                                    <table class="table table-hover" id="table1">
+                                        <thead>
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>Patient Name</th>
+                                                <th>Complaint</th>
+                                                <th>Specialist</th>
+                                                <th>Doctor</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let appointment of appointments">
+                                                <td>{{appointment.time}}</td>
+                                                <td>{{appointment.patientName}}</td>
+                                                <td>{{appointment.complaint}}</td>
+                                                <td>{{appointment.specialist}}</td>
+                                                <td>{{appointment.doctorName}}</td>
+                                                <td *ngIf="appointment.status === 0">
+                                                    <span class="badge badge-success">Upcoming</span>
+                                                </td>
+                                                <td *ngIf="appointment.status === 1">
+                                                    <span class="badge badge-warning">Updated</span>
+                                                </td>
+                                                <td *ngIf="appointment.status === 2">
+                                                    <span class="badge badge-danger">Cancelled</span>
+                                                </td>
+                                                <td *ngIf="appointment.status === 3">
+                                                    <span class="badge bg-blue">Arrived</span>
+                                                </td>
+                                                <td *ngIf="appointment.status === 4">
+                                                    <span class="badge badge-primary">Started</span>
+                                                </td>
+                                                <td *ngIf="appointment.status === 5">
+                                                    <span class="badge badge-muted">Finished</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </ng-container>
+                            <ng-template #notFound>
+                                <div class="p-3 text-center bg-light mb-3">No Upcoming Appointment</div>
+                            </ng-template>
+                            <a [routerLink]="['/hospital/patient/appointments',staffID]"
+                                class="justify-content-end d-flex mt-3 blue">Show full list >>></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

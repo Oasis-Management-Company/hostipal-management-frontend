@@ -1,0 +1,92 @@
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <a [routerLink]="['/hospital/dashboard',staffID]"><img *ngIf="image != null; else noImage" [src]="image"
+                        alt="Logo">
+                    <ng-template #noImage>
+                        <img fetchpriority="high" src="../../../assets/images/logo/OASIS.png" alt="Logo">
+                    </ng-template>
+                </a>
+                <div class="toggler">
+                    <a class="sidebar-hide d-xl-none d-block" onclick="sidebar()"><span class="iconify" data-icon="bi:x"
+                            style="color: grey;"></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu mt-3">
+                <li class="sidebar-item" routerLinkActive="active">
+                    <a [routerLink]="['/hospital/dashboard',staffID]" class='sidebar-link'>
+                        <i class="iconify" data-icon="bi:person-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-1')">
+                        <span class="iconify" data-icon="fluent:patient-32-filled"></span>
+                        <span>Patient</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-1">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/patient/add',staffID]">Add Patient</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/patient/post',staffID]">Post Patients</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/patient/waiting',staffID]">Waiting Room</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/appointments',staffID]">Scheduled Appointments</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-2')">
+                        <span class="iconify" data-icon="fa6-solid:user-doctor"></span>
+                        <span>Doctors</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-2">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/doctor',staffID]">Assigned Patients</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/doctor/record',staffID]">Visit Records</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-3')">
+                        <span class="iconify" data-icon="iconoir:pharmacy-squared-cross"></span>
+                        <span>Services</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-3">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/services/pharmacy',staffID]">Dispense & Pay</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/services/lab',staffID]">Medical Laboratory</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item  has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-4')">
+                        <i class="iconify" data-icon="fluent:checkbox-person-16-regular"></i>
+                        <span>Authentication</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-4">
+                        <li class="submenu-item">
+                            <a class="text-danger" (click)="logout()">Logout</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a (click)="goToManagement()">Management</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="sidebar-bg" class="sidebar-backdrop d-xl-none" onclick="sidebar()"></div>

@@ -1,0 +1,112 @@
+<div id="sidebar" class="active">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <a [routerLink]="['/hospital/management',hospitalID]"><img *ngIf="image != null; else noImage"
+                        [src]="image" alt="Logo">
+                    <ng-template #noImage>
+                        <img fetchpriority="high" src="../../../../assets/images/logo/OASIS.png" alt="Logo">
+                    </ng-template>
+                </a>
+                <div class="toggler">
+                    <a class="sidebar-hide d-xl-none d-block" onclick="sidebar()"><span class="iconify" data-icon="bi:x"
+                            style="color: grey;"></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu mt-3">
+                <li class="sidebar-item" routerLinkActive="active">
+                    <a class='sidebar-link' [routerLink]="['/hospital/management',hospitalID]">
+                        <span class="iconify" data-icon="icomoon-free:stats-bars"></span>
+                        <span>Statistics</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-1')">
+                        <span class="iconify" data-icon="fluent:patient-32-filled"></span>
+                        <span>Patient</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-1">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/patients',hospitalID]">List All Patients</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/appointments',hospitalID]">List All Appointments</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/visits',hospitalID]">Waiting Room</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-2')">
+                        <span class="iconify" data-icon="fa6-solid:user-doctor"></span>
+                        <span>Staff</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-2">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/staff/medical',hospitalID]">Medical Staff</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/staff/nonmed',hospitalID]">Non-Medical Staff</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/staff',hospitalID]">Staff Schedule</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-3')">
+                        <span class="iconify" data-icon="iconoir:pharmacy-squared-cross"></span>
+                        <span>Pharmacy</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-3">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/pharmacy',hospitalID]">Available Drugs</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/pharmacy/payment',hospitalID]">Pending Payment</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-4')">
+                        <span class="iconify" data-icon="fluent:history-24-filled"></span>
+                        <span>Logs</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-4">
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/logs',hospitalID]">All Hospital Logs</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/logs/payment',hospitalID]">Payment Logs</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/logs/dispense',hospitalID]">Dispense Logs</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/logs/appointment',hospitalID]">Appointment Logs</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item has-sub" routerLinkActive="active">
+                    <a class='sidebar-link sub' onclick="dropdown('sub-5')">
+                        <i class="iconify" data-icon="fluent:checkbox-person-16-regular"></i>
+                        <span>Authentication</span>
+                    </a>
+                    <ul class="submenu m-2" id="sub-5">
+                        <li class="submenu-item">
+                            <a (click)="logout()" class="text-danger">Logout</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a [routerLink]="['/hospital/management/settings',hospitalID]">System Settings</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="sidebar-bg" class="sidebar-backdrop d-xl-none" onclick="sidebar()"></div>

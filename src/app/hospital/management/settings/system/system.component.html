@@ -1,0 +1,165 @@
+<div class="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-3 ms-0">
+                <div class="page-title pb-3 mt-2">
+                    <div class="row">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>System Settings</h3>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Settings</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="notAuthorised">
+                    <strong class="col-11 text-danger mt-2">Access Denied. Your access is restricted, contact admin for
+                        clearance</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="isUpdated">
+                    <strong class="col-11 text-success mt-2">Account Details Updated</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="updateFailed">
+                    <strong class="col-11 text-danger mt-2">Account Details could not be updated</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="invalid">
+                    <strong class="col-11 text-danger mt-2">Invalid File Type. Only JPG, JPEG and PNG Allowed</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <h5 class="font-bold mb-3">Edit Details</h5>
+                <div class="row p-3 pt-0">
+                    <div class="col-md-6">
+                        <input type="file" (change)="onFileChanged($event)">
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-end">
+                        <button type="button" class="btn btn-blue" (click)="onUpload()">Upload
+                            Logo</button>
+                    </div>
+                </div>
+                <form class="form" [formGroup]="updateForm" (ngSubmit)="update()">
+                    <div class="form-body row">
+                        <div class="form-group col-6">
+                            <label for="name">Name</label>
+                            <input class="form-control" type="text" name="name" [value]="settings.name" disabled>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="text" name="email" [value]="settings.email" disabled>
+                        </div>
+                        <div class="form-group col-12">
+                            <label for="phone">Phone Number</label>
+                            <input class="form-control" type="text" name="phone" formControlName="phone"
+                                [(ngModel)]="settings.phone">
+                            <div class="alert alert-danger p-2" *ngIf="(phone?.touched) && (phone?.invalid)">
+                                <span *ngIf="phone?.errors?.['required']">This field
+                                    is required.</span>
+                            </div>
+                        </div>
+                        <div class="form-group col-12">
+                            <label for="address">Address</label>
+                            <textarea class="form-control" name="address" rows="3" formControlName="address"
+                                [(ngModel)]="settings.address"></textarea>
+                            <div class="alert alert-danger p-2" *ngIf="(address?.touched) && (address?.invalid)">
+                                <span *ngIf="address?.errors?.['required']">This field
+                                    is required.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5 mb-3">
+                        <button type="submit" class="btn btn-blue me-1">Update Details</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+                <hr>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="passChanged">
+                    <strong class="col-11 text-success mt-2">Password Changed</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="changeFailed">
+                    <strong class="col-11 text-danger mt-2">Could not change
+                        password</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <h5 class="font-bold mb-3 mt-3">Change Password</h5>
+                <form class="form" [formGroup]="changePass" (ngSubmit)="changePassword()">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label for="password">Old Password</label>
+                            <input class="form-control" type="password" name="password" placeholder="Password"
+                                formControlName="password">
+                            <div class="alert alert-danger p-2"
+                                *ngIf="(password?.touched) && ((password?.invalid) || isNotPassword)">
+                                <span *ngIf="password?.errors?.['required']">This field
+                                    is required.</span>
+                                <span *ngIf="isNotPassword">
+                                    Incorrect Password.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password1">New Password</label>
+                            <input class="form-control" type="password" name="password1" placeholder="Password"
+                                formControlName="password1">
+                            <div class="alert alert-danger p-2" *ngIf="(password1?.touched) && (password1?.invalid)">
+                                <span *ngIf="password1?.errors?.['required']">This field
+                                    is required.</span>
+                                <span *ngIf="password1?.errors?.['minlength']">
+                                    Password is too short.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm">Confirm Password</label>
+                            <input class="form-control" type="password" name="confirm" placeholder="Confirm Password"
+                                formControlName="password2">
+                            <div class="alert alert-danger p-2" (change)="checkPassword()"
+                                *ngIf="(password2?.touched) && (password2?.invalid || notEqual)">
+                                <span *ngIf="password2?.errors?.['required']">This
+                                    field is required.</span>
+                                <span *ngIf="notEqual">
+                                    Password must match.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-5">
+                        <button type="submit" class="btn btn-blue me-1">Change Password</button>
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

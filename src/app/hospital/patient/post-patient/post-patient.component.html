@@ -1,0 +1,337 @@
+<div class="app">
+    <app-hospital-sidebar></app-hospital-sidebar>
+    <div id="main" class="row p-2">
+        <header class="col-4">
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="col-8 page-heading m-0 d-flex justify-content-end">
+            <h6>{{date}}</h6>
+        </div>
+        <div class="page-heading mb-0">
+            <div class="row card mb-0 p-4">
+                <div class="page-title">
+                    <div class="row pb-2">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3>Post Patients</h3>
+                            <p></p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Post Patients</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="error">
+                    <strong class="col-11 text-danger mt-2">Error when fetching data. Please Try Again</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="posted">
+                    <strong class="col-11 text-success mt-2">Patient has been posted</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <ng-container *ngIf="appointments.length > 0 || visits.length > 0; else notFound">
+                    <div class="row pb-2 justify-content-start m-0 mt-3">
+                        <div class="col-md-6 col-lg-3 col-12 form-group p-0">
+                            <label>Search</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <select class="form-control" id="sort">
+                                        <option value="0">By Time</option>
+                                        <option value="1">By Name</option>
+                                        <option value="3">By Specialist</option>
+                                    </select>
+                                </div>
+                                <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                    placeholder="Search">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient Name</th>
+                                    <th>Specialist</th>
+                                    <th>Doctor's Name</th>
+                                    <th>Appointment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let appointment of appointments">
+                                    <td>{{appointment.time}}</td>
+                                    <td>{{appointment.patientName}}</td>
+                                    <td>{{appointment.specialist}}</td>
+                                    <td>{{appointment.doctorName}}</td>
+                                    <td *ngIf="appointment.status === 3;else notHere"><span
+                                            class="badge text-success">Arrived</span></td>
+                                    <ng-template #notHere>
+                                        <td><span class="badge text-danger">Not Arrived</span></td>
+                                    </ng-template>
+                                    <td><button class="btn btn-blue" (click)="viewModal(appointment.id)">Post</button>
+                                    </td>
+                                </tr>
+                                <tr *ngFor="let visit of visits">
+                                    <td>{{visit.time}}</td>
+                                    <td>{{visit.patientName}}</td>
+                                    <td>{{visit.specialist}}</td>
+                                    <td>{{visit.doctorName}}</td>
+                                    <td><span class="badge text-danger">No Appointments</span></td>
+                                    <td><button class="btn btn-blue" (click)="visitModal(visit.id)">Post</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Patient Details</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="postError">
+                                    <strong class="col-11 text-danger mt-2">Error when posting patient</strong>
+                                    <button type="button" class="close col-1 text-danger text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <form [formGroup]="postForm" (ngSubmit)="post(visit.id)" class="form">
+                                        <div class="form-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="id">Patient ID</label>
+                                                        <input type="text" class="form-control" name="id"
+                                                            value="{{patient.id}}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="fname">First Name</label>
+                                                        <input type="text" class="form-control" name="fname"
+                                                            value="{{patient.fname}}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="lname">Last Name</label>
+                                                        <input type="text" class="form-control" name="lname"
+                                                            value="{{patient.lname}}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="allergies">Allergies</label>
+                                                        <input type="text" class="form-control" name="allergies"
+                                                            value="{{patient.allergies}}" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="bloodGroup">Blood Group</label>
+                                                        <input type="text" class="form-control" name="bloodGroup"
+                                                            value="{{patient.bloodGroup}}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="bloodType">Blood Type</label>
+                                                        <input type="text" class="form-control" name="bloodType"
+                                                            value="{{patient.bloodType}}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="bloodPressure">Blood Pressure</label>
+                                                        <input [disabled]="patient.age < 20" type="text" class="form-control" name="bloodPressure"
+                                                            formControlName="bloodPressure"
+                                                            [ngModel]="patient.bloodPressure">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(bloodPressure?.touched) && (bloodPressure?.invalid)">
+                                                            <span *ngIf="bloodPressure?.errors?.['required']">This field
+                                                                is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="weight">Weight(kg)</label>
+                                                        <input type="text" class="form-control" name="weight"
+                                                            formControlName="weight" [ngModel]="patient.weight">
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(weight?.touched) && (weight?.invalid)">
+                                                            <span *ngIf="weight?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <ng-container *ngIf="aModal; else vModal">
+                                                    <div class="form-group col-md-6">
+                                                        <label for="specialist">Specialist</label>
+                                                        <select
+                                                            (change)="findDoctor(specialist?.value,appointment.date)"
+                                                            formControlName="specialist"
+                                                            [(ngModel)]="appointment.specialist" name="specialist"
+                                                            class="form-control">
+                                                            <option value="Consultant"
+                                                                [selected]="'Consultant' === appointment.specialist">
+                                                                Consultant</option>
+                                                            <option value="ENT"
+                                                                [selected]="'ENT' === appointment.specialist">ENT
+                                                            </option>
+                                                            <option value="Cardiologist"
+                                                                [selected]="'Cardiologist' === appointment.specialist">
+                                                                Cardiologist</option>
+                                                            <option value="Physician"
+                                                                [selected]="'Physician' === appointment.specialist">
+                                                                Physician</option>
+                                                            <option value="Ophthalmologist"
+                                                                [selected]="'Ophthalmologist' === appointment.specialist">
+                                                                Ophthalmologist</option>
+                                                            <option value="Dermatologist"
+                                                                [selected]="'Dermatologist' === appointment.specialist">
+                                                                Dermatologist</option>
+                                                            <option value="OB-GYN"
+                                                                [selected]="'OB-GYN' === appointment.specialist">OB-GYN
+                                                            </option>
+                                                            <option value="Urologist"
+                                                                [selected]="'Urologist' === appointment.specialist">
+                                                                Urologist</option>
+                                                            <option value="Pediatrician"
+                                                                [selected]="'Pediatrician' === appointment.specialist">
+                                                                Pediatrician</option>
+                                                            <option value="Psychiatrist"
+                                                                [selected]="'Psychiatrist' === appointment.specialist">
+                                                                Psychiatrist</option>
+                                                            <option value="Neurologist"
+                                                                [selected]="'Neurologist' === appointment.specialist">
+                                                                Neurologist</option>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(specialist?.touched) && (specialist?.invalid)">
+                                                            <span *ngIf="specialist?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="doctorName">Doctor Name</label>
+                                                        <select formControlName="doctorName"
+                                                            [(ngModel)]="appointment.doctorName" name="doctorName"
+                                                            class="form-control"
+                                                            (click)="findDoctor(specialist?.value,date?.value)">
+                                                            <ng-container *ngIf="doctors.length > 0; else noDoc">
+                                                                <option *ngFor="let doctor of doctors"
+                                                                    value="{{doctor.name}}"
+                                                                    [selected]="doctor.name === appointment.doctorName">
+                                                                    {{doctor.name}}</option>
+                                                            </ng-container>
+                                                            <ng-template #noDoc>
+                                                                <option selected disabled>No Available Doctor</option>
+                                                            </ng-template>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(doctorName?.touched) && (doctorName?.invalid)">
+                                                            <span *ngIf="doctorName?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-template #vModal>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="specialist">Specialist</label>
+                                                        <select (change)="findDoctor(specialist?.value,visit.date)"
+                                                            formControlName="specialist" [(ngModel)]="visit.specialist"
+                                                            name="specialist" class="form-control">
+                                                            <option value="Consultant"
+                                                                [selected]="'Consultant' === visit.specialist">
+                                                                Consultant</option>
+                                                            <option value="ENT" [selected]="'ENT' === visit.specialist">
+                                                                ENT
+                                                            </option>
+                                                            <option value="Cardiologist"
+                                                                [selected]="'Cardiologist' === visit.specialist">
+                                                                Cardiologist</option>
+                                                            <option value="Physician"
+                                                                [selected]="'Physician' === visit.specialist">
+                                                                Physician</option>
+                                                            <option value="Ophthalmologist"
+                                                                [selected]="'Ophthalmologist' === visit.specialist">
+                                                                Ophthalmologist</option>
+                                                            <option value="Dermatologist"
+                                                                [selected]="'Consultant' === visit.specialist">
+                                                                Dermatologist</option>
+                                                            <option value="OB-GYN"
+                                                                [selected]="'OB-GYN' === visit.specialist">OB-GYN
+                                                            </option>
+                                                            <option value="Urologist"
+                                                                [selected]="'Urologist' === visit.specialist">
+                                                                Urologist</option>
+                                                            <option value="Pediatrician"
+                                                                [selected]="'Pediatrician' === visit.specialist">
+                                                                Pediatrician</option>
+                                                            <option value="Psychiatrist"
+                                                                [selected]="'Psychiatrist' === visit.specialist">
+                                                                Psychiatrist</option>
+                                                            <option value="Neurologist"
+                                                                [selected]="'Neurologist' === visit.specialist">
+                                                                Neurologist</option>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(specialist?.touched) && (specialist?.invalid)">
+                                                            <span *ngIf="specialist?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label for="doctorName">Doctor</label>
+                                                        <select formControlName="doctorName" name="doctorName"
+                                                            class="form-control"
+                                                            (click)="findDoctor(specialist?.value,visit.date)">
+                                                            <ng-container *ngIf="doctors.length > 0; else noDoc">
+                                                                <option *ngFor="let doctor of doctors"
+                                                                    value="{{doctor.name}}">{{doctor.name}}</option>
+                                                            </ng-container>
+                                                            <ng-template #noDoc>
+                                                                <option selected disabled>No Available Doctor</option>
+                                                            </ng-template>
+                                                        </select>
+                                                        <div class="alert alert-danger p-2"
+                                                            *ngIf="(doctorName?.touched) && (doctorName?.invalid)">
+                                                            <span *ngIf="doctorName?.errors?.['required']">This field is
+                                                                required.</span>
+                                                        </div>
+                                                    </div>
+                                                </ng-template>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-blue" *ngIf="aModal; else other"
+                                                (click)="send(appointment.id)">Send Patient</button>
+                                            <ng-template #other><button type="submit" class="btn btn-blue">Post
+                                                    Patient</button></ng-template>
+                                            <button type="button" id="close" (click)="closeModal()"
+                                                class="btn btn-light-primary">Close</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Patient Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+hr.dashed{
+    border-top: 2px dashed;
+    border-bottom: 2px dashed;
+    border-right:none;
+    border-left:none;
+}
+
+hr.dashed2{
+  border-top: 2px dashed;
+  border-bottom: none;
+  border-right:none;
+  border-left:none;
+}
+
+img{
+  width: 50%;
+}
+
+h6{
+  margin-bottom: 0;
+}

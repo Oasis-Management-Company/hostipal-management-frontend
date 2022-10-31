@@ -1,0 +1,28 @@
+.profile.table {
+    height: 60%;
+}
+
+.profile.table td,
+th,
+tr {
+    border-bottom: 1px solid black;
+}
+
+.table-responsive::-webkit-scrollbar {
+    width: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 10px;
+}
+
+.card .table-responsive {
+    height: 250px;
+    overflow-y: auto;
+}

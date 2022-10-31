@@ -1,0 +1,268 @@
+<div class="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card p-3 mb-0 ms-0">
+                <div class="page-title">
+                    <div class="row pb-3">
+                        <div class="col-12 col-md-9 order-md-1 order-last">
+                            <h3>Manage Appointments</h3>
+                        </div>
+                        <div class="col-12 col-md-3 order-md-2 order-first">
+                            <nav aria-label="breadcrumb"
+                                class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Appointments</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="isupdated">
+                    <strong class="col-11 text-success mt-2">Appointment Updated</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="updateFailure">
+                    <strong class="col-11 text-danger mt-2">Appointment could not be updated</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row pb-2 justify-content-start m-0 mt-3">
+                    <div class="col-md-6 col-lg-3 col-12 form-group p-0">
+                        <label>Search</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <select id="sort" class="form-control">
+                                    <option value="0">By Date</option>
+                                    <option value="2">By Name</option>
+                                    <option value="4">By Doctor</option>
+                                </select>
+                            </div>
+                            <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="appointments.length > 0; else notFound">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Patient Name</th>
+                                    <th>Specialist</th>
+                                    <th>Doctor</th>
+                                    <th>Reason</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let appointment of appointments">
+                                    <td>{{appointment.date}}</td>
+                                    <td>{{appointment.time}}</td>
+                                    <td>{{appointment.patientName}}</td>
+                                    <td>{{appointment.specialist}}</td>
+                                    <td>{{appointment.doctorName}}</td>
+                                    <td>{{appointment.complaint}}</td>
+                                    <td *ngIf="appointment.status === 0"><span
+                                            class="badge text-success">Upcoming</span></td>
+                                    <td *ngIf="appointment.status === 1"><span class="badge text-warning">Updated</span>
+                                    </td>
+                                    <td *ngIf="appointment.status === 2"><span
+                                            class="badge text-danger">Cancelled</span></td>
+                                    <td *ngIf="appointment.status === 3"><span class="badge text-blue">Arrived</span>
+                                    </td>
+                                    <td *ngIf="appointment.status === 4"><span class="badge text-primary">Started</span>
+                                    </td>
+                                    <td *ngIf="appointment.status === 5"><span class="badge text-muted">Finished</span>
+                                    </td>
+                                    <td *ngIf="appointment.status === 6"><span class="badge text-danger">Missed</span>
+                                    </td>
+                                    <td><button
+                                            [disabled]="appointment.status === 3 || appointment.status === 4 || appointment.status === 5"
+                                            class="btn btn-blue" (click)="openModal(appointment.id)">Edit
+                                        </button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Update Appointment - {{appointment.patientName}}
+                                    </h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <form [formGroup]="updateForm" (ngSubmit)="update(appointment.id)" class="form">
+                                    <div class="modal-body">
+                                        <div class="row form-body">
+                                            <div class="col-md-6 form-group">
+                                                <label for="date">Date</label>
+                                                <input (change)="findDoctor(specialist?.value,date?.value)" type="date"
+                                                    class="form-control" name="date" formControlName="date"
+                                                    [(ngModel)]="appointment.date">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(date?.touched) && (date?.invalid)">
+                                                    <span *ngIf="date?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="time">Time</label>
+                                                <select class="form-control" name="time" id="time"
+                                                    formControlName="time">
+                                                    <optgroup label="Morning">
+                                                        <option value="10AM-11AM"
+                                                            [selected]="'10AM-11AM' == appointment.time">
+                                                            10AM-11AM
+                                                        </option>
+                                                        <option value="11AM-12PM"
+                                                            [selected]="'11AM-12PM' == appointment.time">
+                                                            11AM-12PM
+                                                        </option>
+                                                        <option value="12PM-1PM"
+                                                            [selected]="'12PM-1PM' == appointment.time">
+                                                            12PM-1PM
+                                                        </option>
+                                                    </optgroup>
+                                                    <optgroup label="Afternoon">
+                                                        <option value="2PM-3PM"
+                                                            [selected]="'2PM-3PM' == appointment.time">
+                                                            2PM-3PM</option>
+                                                        <option value="3PM-4PM"
+                                                            [selected]="'3PM-4PM' == appointment.time">
+                                                            3PM-4PM</option>
+                                                        <option value="4PM-5PM"
+                                                            [selected]="'4PM-5PM' == appointment.time">
+                                                            4PM-5PM</option>
+                                                    </optgroup>
+                                                    <optgroup label="Evening">
+                                                        <option value="6PM-7PM"
+                                                            [selected]="'6PM-7PM' == appointment.time">
+                                                            6PM-7PM</option>
+                                                        <option value="7PM-8PM"
+                                                            [selected]="'7PM-8PM' == appointment.time">
+                                                            7PM-8PM</option>
+                                                        <option value="8PM-9PM"
+                                                            [selected]="'8PM-9PM' == appointment.time">
+                                                            8PM-9PM</option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="specialist">Specialist</label>
+                                                <select (change)="findDoctor(specialist?.value,date?.value)"
+                                                    formControlName="specialist" name="specialist" class="form-control"
+                                                    [(ngModel)]="appointment.specialist">
+                                                    <option selected disabled>--Select Specialist--</option>
+                                                    <option value="Consultant"
+                                                        [selected]="'Consultant' === appointment.specialist">
+                                                        Consultant</option>
+                                                    <option value="ENT" [selected]="'ENT' === appointment.specialist">
+                                                        ENT
+                                                    </option>
+                                                    <option value="Cardiologist"
+                                                        [selected]="'Cardiologist' === appointment.specialist">
+                                                        Cardiologist</option>
+                                                    <option value="Physician"
+                                                        [selected]="'Physician' === appointment.specialist">
+                                                        Physician</option>
+                                                    <option value="Ophthalmologist"
+                                                        [selected]="'Ophthalmologist' === appointment.specialist">
+                                                        Ophthalmologist</option>
+                                                    <option value="Dermatologist"
+                                                        [selected]="'Dermatologist' === appointment.specialist">
+                                                        Dermatologist</option>
+                                                    <option value="OB-GYN"
+                                                        [selected]="'OB-GYN' === appointment.specialist">
+                                                        OB-GYN
+                                                    </option>
+                                                    <option value="Urologist"
+                                                        [selected]="'Urologist' === appointment.specialist">
+                                                        Urologist</option>
+                                                    <option value="Pediatrician"
+                                                        [selected]="'Pediatrician' === appointment.specialist">
+                                                        Pediatrician</option>
+                                                    <option value="Psychiatrist"
+                                                        [selected]="'Psychiatrist' === appointment.specialist">
+                                                        Psychiatrist</option>
+                                                    <option value="Neurologist"
+                                                        [selected]="'Neurologist' === appointment.specialist">
+                                                        Neurologist</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="doctorName">Doctor</label>
+                                                <select formControlName="doctorName"
+                                                    [(ngModel)]="appointment.doctorName" name="doctorName"
+                                                    class="form-control"
+                                                    (click)="findDoctor(specialist?.value,date?.value)">
+                                                    <ng-container *ngIf="doctors.length > 0; else noDoc">
+                                                        <option selected disabled>--Select Doctor--</option>
+                                                        <option *ngFor="let doctor of doctors" value="{{doctor.name}}"
+                                                            [selected]="doctor.name === appointment.doctorName">
+                                                            {{doctor.name}}</option>
+                                                    </ng-container>
+                                                    <ng-template #noDoc>
+                                                        <option selected disabled>No Available Doctor</option>
+                                                    </ng-template>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="complaint">Complaint</label>
+                                                <textarea name="complaint" class="form-control"
+                                                    formControlName="complaint" rows="3"
+                                                    [(ngModel)]="appointment.complaint"></textarea>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(complaint?.touched) && (complaint?.invalid)">
+                                                    <span *ngIf="complaint?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-check form-switch form-group ms-3">
+                                                <label for="cancel">Cancel Appointment</label>
+                                                <input type="checkbox" class="form-check-input" [(ngModel)]="cancelled"
+                                                    name="cancel" formControlName="cancel">
+                                            </div>
+                                            <div class="form-check form-switch form-group ms-3">
+                                                <label for="arrived">Arrived</label>
+                                                <input type="checkbox" class="form-check-input" name="arrived"
+                                                    formControlName="arrived" [(ngModel)]="arrive">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" id="close" (click)="closeModal()"
+                                            class="btn btn-light-primary">Close</button>
+                                        <button type="submit" class="btn btn-blue">Save
+                                            Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Appointment Found</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

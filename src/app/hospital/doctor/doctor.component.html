@@ -1,0 +1,690 @@
+<div class="app">
+    <app-hospital-sidebar></app-hospital-sidebar>
+    <div id="main" class="row p-2">
+        <header class="col-4">
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="col-8 page-heading m-0 d-flex justify-content-end">
+            <h6>{{date}}</h6>
+        </div>
+        <div class="page-content">
+            <div class="row">
+                <div class="col-md-8 col-lg-7 col-12 p-2 pt-0">
+                    <div class="row">
+                        <div class="col-12 col-lg-6 col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body pb-0">
+                                    <div class="row">
+                                        <div class="col-md-4 col-4">
+                                            <div class="stats-icon red">
+                                                <i class="iconify" data-icon="bi:person-fill" style="color: white;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-8">
+                                            <h6 class="text-muted font-semibold">Assigned Patients</h6>
+                                            <p class="text-muted font-semibold">{{visits.length}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body pb-0">
+                                    <div class="row">
+                                        <div class="col-md-4 col-4">
+                                            <div class="stats-icon" style="color: #050a30;">
+                                                <i class="iconify"
+                                                    data-icon="healthicons:i-schedule-school-date-time-outline"
+                                                    style="color: white;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-8">
+                                            <h6 class="text-muted font-semibold">Appointments</h6>
+                                            <p class="text-muted font-semibold">{{appointments.length}}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-12">
+                            <div class="card p-4 mb-3">
+                                <div class="page-title">
+                                    <div class="row pb-3">
+                                        <h3>Upcoming Appointments</h3>
+                                    </div>
+                                </div>
+                                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show"
+                                    role="alert" id="alert" *ngIf="isadded">
+                                    <strong class="col-11 text-success mt-2">Appointment Ended</strong>
+                                    <button type="button" class="close col-1 text-success text-center btn"
+                                        (click)="dismissAlert()">&times;</button>
+                                </div>
+                                <ng-container *ngIf="appointments.length > 0; else notFound">
+                                    <div class="row pb-2 justify-content-start m-0 mt-3">
+                                        <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                            <label>Search</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <select id="sort" class="form-control">
+                                                        <option value="0">By Date</option>
+                                                        <option value="1">By Time</option>
+                                                        <option value="2">By Name</option>
+                                                    </select>
+                                                </div>
+                                                <input type="text" class="col-md-6 form-control" id="search"
+                                                    onkeyup="search('table1')" placeholder="Search">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="table1">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Time</th>
+                                                    <th>Patient Name</th>
+                                                    <th>Complaint</th>
+                                                    <th>Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of appointments">
+                                                    <td>{{item.date}}</td>
+                                                    <td>{{item.time}}</td>
+                                                    <td>{{item.patientName}}</td>
+                                                    <td>{{item.complaint}}</td>
+                                                    <td *ngIf="item.status === 3"><span
+                                                            class="badge text-success">Arrived</span></td>
+                                                    <td *ngIf="item.status === 4"><span
+                                                            class="badge text-blue">Started</span></td>
+                                                    <td><button class="btn btn-blue"
+                                                            (click)="viewModal(item.id)">Start</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-blue">
+                                                    <h5 class="modal-title text-light">Start Appointment</h5>
+                                                    <button class="btn" (click)="closeModal()"><span
+                                                            class="text-light">&times;</span></button>
+                                                </div>
+                                                <div class="d-flex justify-content-center m-3">
+                                                    <button (click)="getRecords(appointment.patientID)"
+                                                        class="btn btn-blue col-12">View Patient Records</button>
+                                                </div>
+                                                <form [formGroup]="endForm" (ngSubmit)="endAppointment(appointment.id)"
+                                                    class="form">
+                                                    <div class="modal-body">
+                                                        <div class="form-body">
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="id">Patient ID</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" class="form-control" name="id"
+                                                                        formControlName="patientID"
+                                                                        [(ngModel)]="appointment.patientID" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="name">Patient Name</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <input type="text" class="form-control" name="name"
+                                                                        formControlName="patientName"
+                                                                        [(ngModel)]="appointment.patientName" readonly>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="complaint">Initial Complaint</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea rows="3" class="form-control"
+                                                                        name="complaint" disabled>{{appointment.complaint}}
+                                                                    </textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="observation">Observation</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea rows="3" class="form-control"
+                                                                        name="observation"
+                                                                        formControlName="observation"></textarea>
+                                                                    <div class="alert alert-danger p-2"
+                                                                        *ngIf="(observation?.touched) && (observation?.invalid)">
+                                                                        <span
+                                                                            *ngIf="observation?.errors?.['required']">This
+                                                                            field is required.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="diagnosis">Diagnosis</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea rows="3" class="form-control"
+                                                                        name="diagnosis"
+                                                                        formControlName="diagnosis"></textarea>
+                                                                    <div class="alert alert-danger p-2"
+                                                                        *ngIf="(diagnosis?.touched) && (diagnosis?.invalid)">
+                                                                        <span
+                                                                            *ngIf="diagnosis?.errors?.['required']">This
+                                                                            field is required.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="prescription">Prescription</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea rows="3" class="form-control"
+                                                                        name="prescription" disabled>{{selectedDrugs}}
+                                                                    </textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-check form-switch form-group">
+                                                                <label for="request">Request Test</label>
+                                                                <input type="checkbox" class="form-check-input"
+                                                                    name="request" formControlName="testRequest">
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <div class="col-md-4">
+                                                                    <label for="test">Test Type</label>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <textarea rows="3" class="form-control" name="test"
+                                                                        formControlName="testType"></textarea>
+                                                                    <div class="alert alert-danger p-2"
+                                                                        *ngIf="(test?.touched) && (test?.invalid)">
+                                                                        <span *ngIf="test?.errors?.['required']">This
+                                                                            field is required.</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <ng-container
+                                                                *ngIf="prescriptions.length > 0; else noPrescription">
+                                                                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                                                    role="alert" id="alert" *ngIf="mustSelect">
+                                                                    <strong class="col-11 text-danger mt-2">Select at
+                                                                        least one
+                                                                        prescription</strong>
+                                                                    <button type="button"
+                                                                        class="close col-1 text-danger text-center btn"
+                                                                        (click)="dismissAlert()">&times;</button>
+                                                                </div>
+                                                                <div class="row pb-2 justify-content-start m-0 mt-3">
+                                                                    <div
+                                                                        class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                                        <label>Search</label>
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-prepend">
+                                                                                <select id="sort2" class="form-control">
+                                                                                    <option value="0">By ID
+                                                                                    </option>
+                                                                                    <option value="1">By Name
+                                                                                    </option>
+                                                                                    <option value="2">By
+                                                                                        Uses</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <input type="text"
+                                                                                class="col-md-6 form-control"
+                                                                                id="search2" onkeyup="search('table2')"
+                                                                                placeholder="Search">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="table-responsive list">
+                                                                    <table class="table table-hover" id="table2">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>ID</th>
+                                                                                <th>Drug Name</th>
+                                                                                <th>Description</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr
+                                                                                *ngFor="let prescription of prescriptions">
+                                                                                <td>{{prescription.id}}</td>
+                                                                                <td>{{prescription.drugName}}
+                                                                                </td>
+                                                                                <td>{{prescription.description}}
+                                                                                </td>
+                                                                                <td><input type="checkbox"
+                                                                                        value="{{prescription.drugName}}"
+                                                                                        (change)="onChange(prescription.drugName,$event)">
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </ng-container>
+                                                            <ng-template #noPrescription>
+                                                                <div class="p-3 text-center bg-light mb-3">No
+                                                                    Prescription Found
+                                                                </div>
+                                                            </ng-template>
+                                                        </div>
+                                                        <div class="modal-footer p-0 pt-2">
+                                                            <button type="button" (click)="closeModal()"
+                                                                class="btn btn-light-primary">Close</button>
+                                                            <button type="submit" class="btn btn-blue">End</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal bg-opaque fade show" id="modal" *ngIf="recordModal">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-blue">
+                                                    <h5 class="modal-title text-light">{{appointment.patientName}}'s
+                                                        Records</h5>
+                                                    <button class="btn" (click)="closeRecords()"><span
+                                                            class="text-light">&times;</span></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <ng-container *ngIf="records.length > 0; else noRecord">
+                                                        <div class="row pb-2 justify-content-start m-0 mt-3">
+                                                            <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                                <label>Search</label>
+                                                                <div class="input-group">
+                                                                    <div class="input-group-prepend">
+                                                                        <select id="sort3" class="form-control">
+                                                                            <option value="0">By Date</option>
+                                                                            <option value="2">By Doctor</option>
+                                                                            <option value="3">By Diagnosis</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <input type="text" class="col-md-6 form-control"
+                                                                        id="search3" onkeyup="search('table3')"
+                                                                        placeholder="Search">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="table-responsive list">
+                                                            <table class="table table-hover" id="table3">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Date</th>
+                                                                        <th>Observation</th>
+                                                                        <th>Doctor Name</th>
+                                                                        <th>Diagnosis</th>
+                                                                        <th>Prescription</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <ng-container *ngFor="let record of records">
+                                                                        <tr>
+                                                                            <td>{{record.date}}</td>
+                                                                            <td>{{record.observation}}</td>
+                                                                            <td>{{record.doctorName}}</td>
+                                                                            <td>{{record.diagnosis}}</td>
+                                                                            <td>{{record.prescriptions}}</td>
+                                                                        </tr>
+                                                                    </ng-container>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </ng-container>
+                                                    <ng-template #noRecord>
+                                                        <div class="p-3 text-center bg-light mb-3">No Record Found
+                                                        </div>
+                                                    </ng-template>
+                                                    <div class="modal-footer p-0 pt-2">
+                                                        <button type="button" (click)="closeRecords()"
+                                                            class="btn btn-light-primary">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <ng-template #notFound>
+                                    <div class="p-3 text-center bg-light mb-3">No Upcoming Appointment</div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-5 col-md-4 p-3 pt-0">
+                    <div class="row">
+                        <div class="card mb-3 p-0">
+                            <div class="card-body">
+                                <div class="row d-flex align-items-center">
+                                    <div class="col-3 col-md-3 col-lg-2 avatar avatar-lg">
+                                        <ng-container *ngIf="image != null; else noImage">
+                                            <img fetchpriority="high" [src]="image" alt="Pic">
+                                        </ng-container>
+                                        <ng-template #noImage>
+                                            <img src="../../../../../assets/images/samples/tab-img-2.jpg" alt="Face 1">
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-8 col-md-8 m-0 ms-2 p-0 name">
+                                        <h5 class="font-semibold">{{doctor.name}}</h5>
+                                        <h6 class="text-muted font-semibold">{{doctor.specialisation}}</h6>
+                                    </div>
+                                </div>
+                                <table class="table table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>Date of Birth</th>
+                                            <td>{{doctor.dob}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Staff ID</th>
+                                            <td>{{doctor.staffID}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Post</th>
+                                            <td>{{doctor.rank}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card p-4">
+                            <div class="page-title">
+                                <div class="row pb-3">
+                                    <h3>Posted Patients</h3>
+                                </div>
+                            </div>
+                            <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                                id="alert" *ngIf="visitAdded">
+                                <strong class="col-11 text-success mt-2">Visit Ended</strong>
+                                <button type="button" class="close col-1 text-success text-center btn"
+                                    (click)="dismissAlert()">&times;</button>
+                            </div>
+                            <div class="row pb-2 justify-content-start m-0 mt-3">
+                                <div class="col-md-12 col-lg-9 col-12 form-group p-0">
+                                    <label>Search</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <select id="sort4" class="form-control">
+                                                <option value="1">By Name</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="col-md-6 form-control" id="search4"
+                                            onkeyup="search('table4')" placeholder="Search">
+                                    </div>
+                                </div>
+                            </div>
+                            <ng-container *ngIf="visits.length > 0; else noPatient">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="table4">
+                                        <thead>
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>Patient Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let item of visits">
+                                                <td>{{item.time}}</td>
+                                                <td>{{item.patientName}}</td>
+                                                <td><button class="btn btn-blue"
+                                                        (click)="walkin(item.id)">Start</button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal bg-opaque fade show" id="modal" *ngIf="visitModal">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-blue">
+                                                <h5 class="modal-title text-light">Start Consultation</h5>
+                                                <button class="btn" (click)="closeModal()"><span
+                                                        class="text-light">&times;</span></button>
+                                            </div>
+                                            <div class="d-flex justify-content-center m-3">
+                                                <button (click)="getVRecords(visit.patientID)"
+                                                    class="btn btn-blue col-12">View Patient Records</button>
+                                            </div>
+                                            <form [formGroup]="endForm" (ngSubmit)="endVisit(visit.id)" class="form">
+                                                <div class="modal-body">
+                                                    <div class="form-body">
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="id">Patient ID</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input type="text" class="form-control" name="id"
+                                                                    formControlName="patientID"
+                                                                    [(ngModel)]="visit.patientID" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="name">Patient Name</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <input type="text" class="form-control" name="name"
+                                                                    formControlName="patientName"
+                                                                    [(ngModel)]="visit.patientName" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="observation">Observation</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <textarea rows="3" class="form-control"
+                                                                    name="observation"
+                                                                    formControlName="observation"></textarea>
+                                                                <div class="alert alert-danger p-2"
+                                                                    *ngIf="(observation?.touched) && (observation?.invalid)">
+                                                                    <span *ngIf="observation?.errors?.['required']">This
+                                                                        field is required.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="diagnosis">Diagnosis</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <textarea rows="3" class="form-control" name="diagnosis"
+                                                                    formControlName="diagnosis"></textarea>
+                                                                <div class="alert alert-danger p-2"
+                                                                    *ngIf="(diagnosis?.touched) && (diagnosis?.invalid)">
+                                                                    <span *ngIf="diagnosis?.errors?.['required']">This
+                                                                        field is required.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="prescription">Prescription</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <textarea rows="3" class="form-control"
+                                                                    name="prescription" disabled>{{selectedDrugs}}
+                                                                </textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-check form-switch form-group">
+                                                            <label for="request">Request Test</label>
+                                                            <input type="checkbox" class="form-check-input"
+                                                                name="request" formControlName="testRequest">
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-md-4">
+                                                                <label for="test">Test Type</label>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <textarea rows="3" class="form-control" name="test"
+                                                                    formControlName="testType"></textarea>
+                                                                <div class="alert alert-danger p-2"
+                                                                    *ngIf="(test?.touched) && (test?.invalid)">
+                                                                    <span *ngIf="test?.errors?.['required']">This
+                                                                        field is required.</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ng-container
+                                                            *ngIf="prescriptions.length > 0; else noPrescription">
+                                                            <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show"
+                                                                role="alert" id="alert" *ngIf="mustSelect">
+                                                                <strong class="col-11 text-danger mt-2">Select at
+                                                                    least one
+                                                                    prescription</strong>
+                                                                <button type="button"
+                                                                    class="close col-1 text-danger text-center btn"
+                                                                    (click)="dismissAlert()">&times;</button>
+                                                            </div>
+                                                            <div class="row pb-2 justify-content-start m-0 mt-3">
+                                                                <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                                    <label>Search</label>
+                                                                    <div class="input-group">
+                                                                        <div class="input-group-prepend">
+                                                                            <select id="sort5" class="form-control">
+                                                                                <option value="0">By ID
+                                                                                </option>
+                                                                                <option value="1">By Name
+                                                                                </option>
+                                                                                <option value="2">By
+                                                                                    Uses</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <input type="text" class="col-md-6 form-control"
+                                                                            id="search5" onkeyup="search('table5')"
+                                                                            placeholder="Search">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="table-responsive list">
+                                                                <table class="table table-hover" id="table5">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>ID</th>
+                                                                            <th>Drug Name</th>
+                                                                            <th>Description</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr *ngFor="let prescription of prescriptions">
+                                                                            <td>{{prescription.id}}</td>
+                                                                            <td>{{prescription.drugName}}
+                                                                            </td>
+                                                                            <td>{{prescription.description}}
+                                                                            </td>
+                                                                            <td><input type="checkbox"
+                                                                                    class="form-check-input"
+                                                                                    value="{{prescription.drugName}}"
+                                                                                    (change)="onChange(prescription.drugName,$event)">
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </ng-container>
+                                                        <ng-template #noPrescription>
+                                                            <div class="p-3 text-center bg-light mb-3">No
+                                                                Prescription Found
+                                                            </div>
+                                                        </ng-template>
+                                                    </div>
+                                                    <div class="modal-footer p-0 pt-2">
+                                                        <button type="button" (click)="closeModal()"
+                                                            class="btn btn-light-primary">Close</button>
+                                                        <button type="submit" class="btn btn-blue">End</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal bg-opaque fade show" id="modal" *ngIf="visitRecordModal">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-blue">
+                                                <h5 class="modal-title text-light">{{visit.patientName}}'s Records</h5>
+                                                <button class="btn" (click)="closeRecords()"><span
+                                                        class="text-light">&times;</span></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ng-container *ngIf="records.length > 0; else noRecord">
+                                                    <div class="row pb-2 justify-content-start m-0 mt-3">
+                                                        <div class="col-md-6 col-lg-6 col-12 form-group p-0">
+                                                            <label>Search</label>
+                                                            <div class="input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <select id="sort6" class="form-control">
+                                                                        <option value="0">By Date</option>
+                                                                        <option value="2">By Doctor</option>
+                                                                        <option value="3">By Diagnosis</option>
+                                                                    </select>
+                                                                </div>
+                                                                <input type="text" class="col-md-6 form-control"
+                                                                    id="search6" onkeyup="search('table6')"
+                                                                    placeholder="Search">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-responsive list">
+                                                        <table class="table table-hover" id="table6">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Observation</th>
+                                                                    <th>Doctor Name</th>
+                                                                    <th>Diagnosis</th>
+                                                                    <th>Prescription</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <ng-container *ngFor="let record of records">
+                                                                    <tr>
+                                                                        <td>{{record.date}}</td>
+                                                                        <td>{{record.observation}}</td>
+                                                                        <td>{{record.doctorName}}</td>
+                                                                        <td>{{record.diagnosis}}</td>
+                                                                        <td>{{record.prescriptions}}</td>
+                                                                    </tr>
+                                                                </ng-container>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-template #noRecord>
+                                                    <div class="p-3 text-center bg-light mb-3">No Record Found
+                                                    </div>
+                                                </ng-template>
+                                                <div class="modal-footer p-0 pt-2">
+                                                    <button type="button" (click)="closeRecords()"
+                                                        class="btn btn-light-primary">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-container>
+                            <ng-template #noPatient>
+                                <div class="p-3 text-center bg-light mb-3">No Posted Patient</div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

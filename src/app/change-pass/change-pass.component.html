@@ -1,0 +1,54 @@
+<div class="app auth">
+    <div class="page-content">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6 col-lg-4 col-8  p-4 pe-5 ps-5 card mt-5">
+                <h2 class="font-bold">Change Password</h2>
+                <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="passChanged">
+                    <strong class="col-11 text-success mt-2">Password Changed</strong>
+                    <button type="button" class="close col-1 text-success text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert" id="alert"
+                    *ngIf="changeFailed">
+                    <strong class="col-11 text-danger mt-2">Could not change
+                        password</strong>
+                    <button type="button" class="close col-1 text-danger text-center btn"
+                        (click)="dismissAlert()">&times;</button>
+                </div>
+                <form [formGroup]="changePass" (ngSubmit)="changePassword()" class="form">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label for="password1">New Password</label>
+                            <input type="password" class="form-control" name="password1" formControlName="password1">
+                            <div class="alert alert-danger p-2" *ngIf="(password1?.touched) && (password1?.invalid)">
+                                <span *ngIf="password1?.errors?.['required']">This field
+                                    is required.</span>
+                                <span *ngIf="password1?.errors?.['minlength']">
+                                    Password is too short.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password2">Confirm Password</label>
+                            <input type="password" class="form-control" name="password2" formControlName="password2">
+                            <div class="alert alert-danger p-2" (change)="checkPassword()"
+                                *ngIf="(password2?.touched) && (password2?.invalid || notEqual)">
+                                <span *ngIf="password2?.errors?.['required']">This
+                                    field is required.</span>
+                                <span *ngIf="notEqual">
+                                    Password must match.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions d-flex justify-content-end mt-4">
+                        <button type="reset" class="btn btn-light-primary">Cancel</button>
+                        <button type="submit" class="btn btn-blue">Change
+                            Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

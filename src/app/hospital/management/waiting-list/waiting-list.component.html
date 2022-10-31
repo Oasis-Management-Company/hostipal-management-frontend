@@ -1,0 +1,215 @@
+<div class="app">
+    <app-management-sidebar></app-management-sidebar>
+    <div id="main" class="row p-2">
+        <header>
+            <a class="burger-btn d-block d-xl-none" onclick="sidebar()">
+                <span class="iconify" data-icon="akar-icons:three-line-horizontal" style="color: grey;"></span>
+            </a>
+        </header>
+        <div class="page-heading mb-0">
+            <div class="row card p-3 mb-0 ms-0">
+                <div class="page-title">
+                    <div class="row pb-3">
+                        <div class="col-12 col-md-8 order-md-1 order-last">
+                            <h3>Waiting Room</h3>
+                            <p></p>
+                        </div>
+                        <div class="col-12 col-md-4 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-md-end float-lg-end">
+                                <ol class="breadcrumb pt-1 p-0">
+                                    <li class="breadcrumb-item">
+                                        <a><i class="iconify" data-icon="bi:person-fill"
+                                                style="color: #050a30;"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Waiting Patients</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <ng-container *ngIf="visits.length > 0; else notFound">
+                    <div class="row alert alert-light-success alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                        id="alert" *ngIf="isupdated">
+                        <strong class="col-11 text-success mt-2">Visit Updated</strong>
+                        <button type="button" class="close col-1 text-success text-center btn"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="row alert alert-light-danger alert-dismissible m-0 mb-3 p-2 show" role="alert"
+                        id="alert" *ngIf="updateFailure">
+                        <strong class="col-11 text-danger mt-2">Visit could not be updated</strong>
+                        <button type="button" class="close col-1 text-danger text-center btn"
+                            (click)="dismissAlert()">&times;</button>
+                    </div>
+                    <div class="row pb-2 justify-content-start m-0 mt-3">
+                        <div class="col-md-6 col-lg-3 col-12 form-group p-0">
+                            <label>Search</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <select id="sort" class="form-control">
+                                        <option value="1">By ID</option>
+                                        <option value="2">By Name</option>
+                                        <option value="3">By Specialist</option>
+                                        <option value="4">By Status</option>
+                                    </select>
+                                </div>
+                                <input type="text" class="col-md-6 form-control" id="search" onkeyup="search('table1')"
+                                    placeholder="Search">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Patient ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Specialist</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let visit of visits">
+                                    <td>{{visit.date}}</td>
+                                    <td>{{visit.time}}</td>
+                                    <td>{{visit.patientID}}</td>
+                                    <td>{{visit.patientName}}</td>
+                                    <td>{{visit.specialist}}</td>
+                                    <td>{{visit.doctorName}}</td>
+                                    <td *ngIf="visit.status === 0"><span class="badge badge-warning">Waiting</span>
+                                    </td>
+                                    <td *ngIf="visit.status === 1"><span class="badge badge-success">Posted</span>
+                                    </td>
+                                    <td *ngIf="visit.status === 2"><span class="badge bg-blue">Started</span></td>
+                                    <td *ngIf="visit.status === 5"><span class="badge bg-danger">Cancelled</span></td>
+                                    <td *ngIf="visit.status === 3"><span class="badge badge-muted">Finished</span>
+                                    </td>
+                                    <td><button [disabled]="visit.status === 2 || visit.status === 3"
+                                            class="btn btn-blue" (click)="openModal(visit.id)">Edit
+                                        </button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal bg-opaque fade show" id="modal" *ngIf="modal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bg-blue">
+                                    <h5 class="modal-title text-light">Update Visit - {{visit.patientName}}</h5>
+                                    <button class="btn" (click)="closeModal()"><span
+                                            class="text-light">&times;</span></button>
+                                </div>
+                                <form [formGroup]="updateForm" (ngSubmit)="update(visit.id)" class="form">
+                                    <div class="modal-body">
+                                        <div class="row form-body">
+                                            <div class="col-md-6 form-group">
+                                                <label for="date">Date</label>
+                                                <input (change)="findDoctor(specialist?.value,date?.value)" type="date"
+                                                    class="form-control" name="date" formControlName="date"
+                                                    [(ngModel)]="visit.date">
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(date?.touched) && (date?.invalid)">
+                                                    <span *ngIf="date?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="time">Time</label>
+                                                <input type="time" class="form-control" name="time"
+                                                    formControlName="time" [(ngModel)]="visit.time">
+                                                    <div class="alert alert-danger p-2"
+                                                        *ngIf="(time?.touched) && (time?.invalid)">
+                                                        <span *ngIf="time?.errors?.['required']">This field
+                                                            is required.</span>
+                                                    </div>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="specialist">Specialist</label>
+                                                <select (change)="findDoctor(specialist?.value,date?.value)"
+                                                    formControlName="specialist" name="specialist" class="form-control"
+                                                    [(ngModel)]="visit.specialist">
+                                                    <option value="Consultant"
+                                                        [selected]="'Consultant' === visit.specialist">
+                                                        Consultant</option>
+                                                    <option value="ENT" [selected]="'ENT' === visit.specialist">
+                                                        ENT
+                                                    </option>
+                                                    <option value="Cardiologist"
+                                                        [selected]="'Cardiologist' === visit.specialist">
+                                                        Cardiologist</option>
+                                                    <option value="Physician"
+                                                        [selected]="'Physician' === visit.specialist">
+                                                        Physician</option>
+                                                    <option value="Ophthalmologist"
+                                                        [selected]="'Ophthalmologist' === visit.specialist">
+                                                        Ophthalmologist</option>
+                                                    <option value="Dermatologist"
+                                                        [selected]="'Dermatologist' === visit.specialist">
+                                                        Dermatologist</option>
+                                                    <option value="OB-GYN" [selected]="'OB-GYN' === visit.specialist">
+                                                        OB-GYN
+                                                    </option>
+                                                    <option value="Urologist"
+                                                        [selected]="'Urologist' === visit.specialist">
+                                                        Urologist</option>
+                                                    <option value="Pediatrician"
+                                                        [selected]="'Pediatrician' === visit.specialist">
+                                                        Pediatrician</option>
+                                                    <option value="Psychiatrist"
+                                                        [selected]="'Psychiatrist' === visit.specialist">
+                                                        Psychiatrist</option>
+                                                    <option value="Neurologist"
+                                                        [selected]="'Neurologist' === visit.specialist">
+                                                        Neurologist</option>
+                                                </select>
+                                                <div class="alert alert-danger p-2"
+                                                    *ngIf="(specialist?.touched) && (specialist?.invalid)">
+                                                    <span *ngIf="specialist?.errors?.['required']">This field
+                                                        is required.</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label for="doctorName">Doctor</label>
+                                                <select formControlName="doctorName" [(ngModel)]="visit.doctorName"
+                                                    name="doctorName" class="form-control"
+                                                    (click)="findDoctor(specialist?.value,date?.value)">
+                                                    <ng-container *ngIf="doctors.length > 0; else noDoc">
+                                                        <option selected disabled>--Select Doctor--</option>
+                                                        <option *ngFor="let doctor of doctors" value="{{doctor.name}}"
+                                                            [selected]="doctor.name === visit.doctorName">
+                                                            {{doctor.name}}</option>
+                                                    </ng-container>
+                                                    <ng-template #noDoc>
+                                                        <option selected disabled>No Available Doctor</option>
+                                                    </ng-template>
+                                                </select>
+                                            </div>
+                                            <div class="form-check form-switch form-group ms-5 p-1">
+                                                <input type="checkbox" class="form-check-input" [(ngModel)]="cancelled"
+                                                    name="cancel" formControlName="cancel">
+                                                <label for="cancel">Cancel Visit</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" id="close" (click)="closeModal()"
+                                            class="btn btn-light-primary">Close</button>
+                                        <button type="submit" class="btn btn-blue" [disabled]="updateForm.invalid">Save
+                                            Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #notFound>
+                    <div class="p-3 text-center bg-light mb-3">No Patients Waiting</div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
